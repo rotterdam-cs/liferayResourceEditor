@@ -15,6 +15,7 @@ import org.springframework.web.portlet.bind.annotation.ResourceMapping;
 import javax.portlet.PortletRequest;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
+import java.io.IOException;
 
 @Controller
 @RequestMapping("VIEW")
@@ -37,8 +38,8 @@ public class MainController extends BaseController {
     }
 
     @ResourceMapping("resourceContent")
-    public void resourceContent(ResourceRequest request, ResourceResponse response) {
-        writeResponse(response, messageSourceService.getMessageSourceWrappers(0, 10));
+    public void resourceContent(@RequestParam("startIndex") Integer startIndex,@RequestParam("pageSize") Integer pageSize,ResourceRequest request, ResourceResponse response) {
+        writeResponse(response, messageSourceService.getMSWJson(startIndex, startIndex + pageSize));
     }
 
     @ResourceMapping("uploadResources")

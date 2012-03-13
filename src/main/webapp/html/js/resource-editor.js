@@ -5,7 +5,10 @@
         this.saveButtonClass = "save-button";
         this.newButtonClass = 'new-button';
         this.paginatorId = "paginator";
+        this.paginContainerId = "paginContainer";
+        this.defauldSize = 10;
         $this = this;
+        $globalScope = this;
         this._init(config);
     };
 
@@ -34,7 +37,6 @@
 
                 var editor = this;
                 editor._loadContent();
-                editor._viewPagination(editor.configuration.itemCount);
 
             },
 
@@ -52,42 +54,81 @@
 
                 $('.' + editor.newButtonClass).on('click', editor._editResource);
 
+                var paginatorContainer = _getObjById(_getRealId(editor.configuration.namespace, editor.paginContainerId));
+                paginatorContainer.on('click', 'a', editor._afterPaginClicked);
+
             },
 
-            _viewPagination:function(){
+            _afterPaginClicked:function(){
+                var $a = $(this);
+                var text = $a.text();
+                var idx = 1;
+                if(text == 'First'){
 
+                }else if(text == 'Last'){
+                    var last = _getObjById(_getRealId($globalScope.configuration.namespace, $globalScope.paginatorId)).find('li:last-child');
+                    idx = last.text();
+                } else {
+                    idx = text;
+                }
+                $globalScope._reloadContent(idx);
+            },
+
+            _viewPagination:function(count, start, pageSize){
+                var pageCount = count/pageSize;
+                var startPage = start/pageSize + 1;
+                _getObjById(_getRealId($globalScope.configuration.namespace, $globalScope.paginatorId)).paginate({
+                    count 		: pageCount,
+                    start 		: startPage,
+                    display     : pageSize,
+                    border					: true,
+                    border_color			: '#fff',
+                    text_color  			: '#fff',
+                    background_color    	: 'grey',
+                    border_hover_color		: '#ccc',
+                    text_hover_color  		: '#000',
+                    background_hover_color	: '#fff',
+                    images					: false,
+                    mouse					: 'press'
+                });
             },
 
             _editResource: function(){
-                window.location.href = $this.configuration.editURL;
+                window.location.href = $globalScope.configuration.editURL;
             },
 
             _delete: function(){
-                if(confirm($this.configuration.deleteMSG)){
+                if(confirm($globalScope.configuration.deleteMSG)){
                     var $a = $(this);
                     var key = $a.closest('tr').children('td').eq(0).children('input[type=text]').val();
-                    _sendAjax($this.configuration.deleteURL, key, $this._reloadContent);
+                    _sendAjax($globalScope.configuration.deleteURL, key, $globalScope._reloadAll);
                 }
                 return false;
             },
 
-            _reloadContent: function(){
-                var editor = $this;
-                var json = _getJson(editor.configuration.resourceContentURL, editor._viewContent);
+            _reloadAll: function(){
+                window.location.reload();
+            },
+
+            _reloadContent: function(page){
+                var editor = this;
+                var data = '&startIndex=' + (page*this.defauldSize - this.defauldSize)  + '&pageSize=' + this.defauldSize;
+                var json = _getJson(editor.configuration.resourceContentURL, data, editor._viewContent);
             },
 
             _loadContent: function(){
                 var editor = $this;
-                editor._viewContent(editor.configuration.mswJson);
-
+                var json = editor.configuration.mswJson
+                editor._viewContent(json);
+                editor._viewPagination(json.totalRecords, json.start, this.defauldSize);
             },
 
             _viewContent: function(json){
 
-                var editor = $this;
+                var editor = $globalScope;
                 var contentBox = _getObjById(_getRealId(editor.configuration.namespace, editor.mswContentId));
                 var content = '<table>';
-                jQuery.each(json, function (idx, obj) {
+                jQuery.each(json.records, function (idx, obj) {
                     var inputId = editor.configuration.namespace + '_resource_' + idx;
                     content += '<tr>';
                     content += '<td><input type="text" value="' + obj.key + '" readonly></td>';
@@ -144,12 +185,9 @@
                 _sendAjax(editor.configuration.uploadResourcesURL, json, editor._afterResourcesUploaded)
             },
 
-            _setResourceValue: function (){
-
-            },
-
             _afterResourcesUploaded: function(response){
-                console.log('success');
+                var currentPage = $('.jPag-current').text();
+                $globalScope._reloadContent(currentPage);
             }
         }
     });
@@ -181,7 +219,6 @@
                 if(isKeyValid){
                     var json = editor._serializeTable();
                     var form = _getObjById(_getRealId(editor.configuration.namespace, editor.formId));
-                    console.log(json);
                     form.children("input[name=data]").val(json);
                     form.submit();
                 }
@@ -238,9 +275,9 @@ function _sendAjax(url, data, success){
     });
 }
 
-function _getJson(url, success){
+function _getJson(url, data, success){
     jQuery.ajax({
-        url: url,
+        url: url + data,
         type: 'POST',
         dataType: 'json',
         success: success

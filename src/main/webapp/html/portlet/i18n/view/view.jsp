@@ -8,6 +8,8 @@
     <button class="new-button"><liferay-ui:message key="new"/></button>
 </div>
 
-<div id="${namespace}paginator">
+<div id="${namespace}paginContainer">
+    <div id="${namespace}paginator">
 
+    </div>
 </div>

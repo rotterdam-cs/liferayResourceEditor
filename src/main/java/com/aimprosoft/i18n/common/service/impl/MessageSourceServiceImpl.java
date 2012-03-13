@@ -60,8 +60,8 @@ public class MessageSourceServiceImpl implements MessageSourceService {
     public String getMSWJson(int start, int end) {
         String json ="{\"totalRecords\":\"" + getMessageSourcesCount() + "\","
                 + "\"start\":\"" + start + "\","
-                + "\"records\":\"" + getMessageSourceWrappers(start, end)
-                + "\"}";
+                + "\"records\":" + getMessageSourceWrappers(start, end)
+                + "}";
         return json;
     }
 

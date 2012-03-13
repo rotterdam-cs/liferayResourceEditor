@@ -5,14 +5,13 @@
     jQuery(document).ready(function($){
 
         jQuery.ajax({
-            url: '${resourceContentURL}',
+            url: '${resourceContentURL}' + '&startIndex=0&pageSize=10',
             type: 'POST',
             dataType: 'json',
             success: init
         });
 
         function init(data){
-
             var editor = new ResourceEditor({
                 namespace : '<portlet:namespace/>',
                 uploadResourcesURL: '${uploadResourcesURL}',

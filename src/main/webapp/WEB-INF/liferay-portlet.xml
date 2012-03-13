@@ -11,9 +11,11 @@
         <ajaxable>false</ajaxable>
         <!--<header-portlet-css>/html/css/slider.css</header-portlet-css>-->
         <header-portlet-css>/html/css/resources.css</header-portlet-css>
+        <header-portlet-css>/html/css/style.css</header-portlet-css>
         <!--Local version of jQuery-->
         <!--<header-portlet-javascript>/html/js/jquery.min.js</header-portlet-javascript>-->
         <header-portlet-javascript>https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js</header-portlet-javascript>
+        <header-portlet-javascript>/html/js/jquery.paginate.js</header-portlet-javascript>
         <!--<header-portlet-javascript>/html/js/slides.jquery.js</header-portlet-javascript>-->
         <!--<header-portlet-javascript>/html/js/slider.js</header-portlet-javascript>-->
         <header-portlet-javascript>/html/js/resource-editor.js</header-portlet-javascript>

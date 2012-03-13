@@ -1,6 +1,5 @@
 package com.aimprosoft.i18n.hook.model;
 
-import java.util.List;
 import java.util.Map;
 
 public class MessageSourceWrapper {
