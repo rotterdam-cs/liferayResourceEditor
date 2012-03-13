@@ -1,0 +1,13 @@
+.resource-value{
+    width: 200px;
+    margin-left: 20px;
+}
+.resource-locale{
+    width: 40px;
+}
+.error{
+    color: red;
+}
+.none{
+    display: none;
+}

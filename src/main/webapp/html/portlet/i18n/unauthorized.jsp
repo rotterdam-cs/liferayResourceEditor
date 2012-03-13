@@ -1,0 +1,3 @@
+<div>
+    Permission denied
+</div>

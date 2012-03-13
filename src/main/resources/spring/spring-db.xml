@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--suppress SpringBeanNameConventionInspection, AutowiredDependenciesInspection -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       http://www.springframework.org/schema/util
+       http://www.springframework.org/schema/util/spring-util-3.0.xsd"
+       default-autowire="byName">
+
+    <!--Liferay datasource-->
+    <bean name="dataSource" class="com.liferay.portal.kernel.util.InfrastructureUtil" factory-method="getDataSource"/>
+
+    <bean name="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean"
+          scope="singleton">
+        <property name="dataSource" ref="dataSource"/>
+
+        <property name="annotatedClasses">
+            <list>
+                <value>com.aimprosoft.i18n.common.model.impl.MessageSource</value>
+            </list>
+        </property>
+
+        <property name="hibernateProperties">
+            <util:properties location="classpath:/spring/hibernate.properties"/>
+        </property>
+    </bean>
+
+    <bean name="transactionManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory"/>
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <tx:annotation-driven mode="proxy" transaction-manager="transactionManager" proxy-target-class="true"/>
+
+    <bean name="persistence" class="com.aimprosoft.i18n.common.persistence.impl.PersistenceImpl"
+          scope="singleton" abstract="true">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+
+</beans>
