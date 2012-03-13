@@ -1,5 +1,46 @@
 ;
 (function ($) {
+
+    var Utils = {
+
+        _getRealId:function (namespase, id) {
+            var realId = namespase + id;
+            return realId;
+        },
+
+        _getObjById:function (id) {
+            return jQuery('#' + id);
+        },
+
+        _sendAjax:function (url, data, success) {
+            jQuery.ajax({
+                url:url,
+                type:'POST',
+                data:'data=' + data + '&rand=' + Math.random(),
+                success:success
+            });
+        },
+
+        _getJson:function (url, data, success) {
+            jQuery.ajax({
+                url:url + data,
+                type:'POST',
+                dataType:'json',
+                success:success
+            });
+        },
+
+        _createProxyListener:function (listener, scope, args) {
+
+            return function () {
+
+                return listener.call(scope, args);
+
+            }
+
+        }
+    };
+
     var ResourceEditor = function (config) {
         this.mswContentId = "mswContent";
         this.saveButtonClass = "save-button";
@@ -24,6 +65,7 @@
     $.extend(true, ResourceEditor, {
         prototype:{
             _init:function (config) {
+
                 var editor = this;
 
                 editor.configuration = config;
@@ -36,29 +78,33 @@
             _initUI:function () {
 
                 var editor = this;
+
                 editor._loadContent();
 
             },
 
             _bindEvents:function () {
+
                 var editor = this;
-                var contentBox = _getObjById(_getRealId(editor.configuration.namespace, editor.mswContentId));
+                //MessageSourceWrappers container
+                var contentBox = Utils._getObjById(Utils._getRealId(editor.configuration.namespace, editor.mswContentId));
 
-                contentBox.delegate('select', 'change', editor._selectOnChange);
+                contentBox.on('change', 'select', editor._selectOnChange);
 
-                contentBox.delegate('input.content', 'focusout', editor._inputOnFocusOut);
+                contentBox.on('focusout', 'input.content', editor._inputOnFocusOut);
 
-                contentBox.delegate('a.delete', 'click', editor._delete);
+                contentBox.on('click', 'a.delete', editor._delete);
 
-                $('.' + editor.saveButtonClass).on('click', _createProxyListener(editor._saveResources, editor));
+                $('.' + editor.saveButtonClass).on('click', Utils._createProxyListener(editor._saveResources, editor));
 
                 $('.' + editor.newButtonClass).on('click', editor._editResource);
 
-                var paginatorContainer = _getObjById(_getRealId(editor.configuration.namespace, editor.paginContainerId));
+                var paginatorContainer = Utils._getObjById(Utils._getRealId(editor.configuration.namespace, editor.paginContainerId));
                 paginatorContainer.on('click', 'a', editor._afterPaginClicked);
 
             },
 
+            //get selected page number and reload content using it
             _afterPaginClicked:function(){
                 var $a = $(this);
                 var text = $a.text();
@@ -66,7 +112,7 @@
                 if(text == 'First'){
 
                 }else if(text == 'Last'){
-                    var last = _getObjById(_getRealId($globalScope.configuration.namespace, $globalScope.paginatorId)).find('li:last-child');
+                    var last = Utils._getObjById(Utils._getRealId($globalScope.configuration.namespace, $globalScope.paginatorId)).find('li:last-child');
                     idx = last.text();
                 } else {
                     idx = text;
@@ -74,10 +120,11 @@
                 $globalScope._reloadContent(idx);
             },
 
+            //init pagination
             _viewPagination:function(count, start, pageSize){
                 var pageCount = count/pageSize;
                 var startPage = start/pageSize + 1;
-                _getObjById(_getRealId($globalScope.configuration.namespace, $globalScope.paginatorId)).paginate({
+                Utils._getObjById(Utils._getRealId($globalScope.configuration.namespace, $globalScope.paginatorId)).paginate({
                     count 		: pageCount,
                     start 		: startPage,
                     display     : pageSize,
@@ -93,15 +140,17 @@
                 });
             },
 
+            //go to resource edit page
             _editResource: function(){
                 window.location.href = $globalScope.configuration.editURL;
             },
 
+            //delete row
             _delete: function(){
                 if(confirm($globalScope.configuration.deleteMSG)){
                     var $a = $(this);
                     var key = $a.closest('tr').children('td').eq(0).children('input[type=text]').val();
-                    _sendAjax($globalScope.configuration.deleteURL, key, $globalScope._reloadAll);
+                    Utils._sendAjax($globalScope.configuration.deleteURL, key, $globalScope._reloadAll);
                 }
                 return false;
             },
@@ -113,9 +162,10 @@
             _reloadContent: function(page){
                 var editor = this;
                 var data = '&startIndex=' + (page*this.defauldSize - this.defauldSize)  + '&pageSize=' + this.defauldSize;
-                var json = _getJson(editor.configuration.resourceContentURL, data, editor._viewContent);
+                var json = Utils._getJson(editor.configuration.resourceContentURL, data, editor._viewContent);
             },
 
+            //view content and pagination
             _loadContent: function(){
                 var editor = $this;
                 var json = editor.configuration.mswJson
@@ -126,14 +176,19 @@
             _viewContent: function(json){
 
                 var editor = $globalScope;
-                var contentBox = _getObjById(_getRealId(editor.configuration.namespace, editor.mswContentId));
+                var contentBox = Utils._getObjById(Utils._getRealId(editor.configuration.namespace, editor.mswContentId));
                 var content = '<table>';
                 jQuery.each(json.records, function (idx, obj) {
                     var inputId = editor.configuration.namespace + '_resource_' + idx;
+                    var firstKey = '';
+                    jQuery.each(obj.source, function (sIdx, sourceItm) {
+                        firstKey = sourceItm;
+                        return;
+                    });
                     content += '<tr>';
                     content += '<td><input type="text" value="' + obj.key + '" readonly></td>';
                     content += '<td><input class="content" id="' + inputId + '" type="text" name="' + obj.key
-                        + '" value="' + obj.source['sl_SI'] + '"></td>';
+                        + '" value="' + firstKey + '"></td>';
                     content += '<td><select name="' + obj.key + '">';
                     jQuery.each(obj.source, function (sIdx, sourceItm) {
                         content += '<option data-key="'+obj.key+'" data-value="" value="' + sourceItm + '">' + sIdx + '</option>';
@@ -148,6 +203,7 @@
                     .append(content);
             },
 
+            //When select changed set MessageSource value to input from selected option
             _selectOnChange: function(){
                 var $select = $(this);
                 $select
@@ -158,6 +214,8 @@
                     .val($select.val());
             },
 
+            //When input stopped editing and focus out, get input value and set in to relevant option
+            //and set options 'data-value' to 'changed'
             _inputOnFocusOut: function(){
                 var $input = $(this);
                 var inputVal = $input.val();
@@ -172,6 +230,7 @@
                     .attr('data-value', 'changed');
             },
 
+            //get all options that was changed, serialize them and post via ajax
             _saveResources:function () {
                 var editor = this;
                 var json = '[';
@@ -182,9 +241,10 @@
                 });
                 json = json.slice(0, -1);
                 json += ']';
-                _sendAjax(editor.configuration.uploadResourcesURL, json, editor._afterResourcesUploaded)
+                Utils._sendAjax(editor.configuration.uploadResourcesURL, json, editor._afterResourcesUploaded)
             },
 
+            //get current selected page and reload content using it
             _afterResourcesUploaded: function(response){
                 var currentPage = $('.jPag-current').text();
                 $globalScope._reloadContent(currentPage);
@@ -208,17 +268,17 @@
             },
             _bindEvents: function(){
                 var editor = this;
-                $('.' + editor.saveButtonClass).on('click', _createProxyListener(editor._saveResources, editor));
+                $('.' + editor.saveButtonClass).on('click', Utils._createProxyListener(editor._saveResources, editor));
             },
 
             _saveResources: function(){
                 var editor = this;
-                var key = _getObjById(_getRealId(editor.configuration.namespace, editor.keyInputId));
+                var key = Utils._getObjById(Utils._getRealId(editor.configuration.namespace, editor.keyInputId));
 
                 var isKeyValid = editor._validateKey(key);
                 if(isKeyValid){
                     var json = editor._serializeTable();
-                    var form = _getObjById(_getRealId(editor.configuration.namespace, editor.formId));
+                    var form = Utils._getObjById(Utils._getRealId(editor.configuration.namespace, editor.formId));
                     form.children("input[name=data]").val(json);
                     form.submit();
                 }
@@ -226,8 +286,8 @@
             },
 
             _serializeTable: function(){
-                var trArr = _getObjById(_getRealId($this.configuration.namespace, $this.contentId)).find('tr');
-                var keyVal = _getObjById(_getRealId($this.configuration.namespace, $this.keyInputId)).val();
+                var trArr = Utils._getObjById(Utils._getRealId($this.configuration.namespace, $this.contentId)).find('tr');
+                var keyVal = Utils._getObjById(Utils._getRealId($this.configuration.namespace, $this.keyInputId)).val();
                 var json = '[';
                 $.each(trArr, function(idx, tr){
                     var $tr = $(tr);
@@ -256,40 +316,3 @@
     window.EditResourceKey = EditResourceKey;
 
 })(jQuery);
-
-function _getRealId(namespase, id) {
-    var realId = namespase + id;
-    return realId;
-}
-
-function _getObjById(id) {
-    return jQuery('#' + id);
-}
-
-function _sendAjax(url, data, success){
-    jQuery.ajax({
-        url: url,
-        type: 'POST',
-        data: 'data=' + data + '&rand=' +Math.random(),
-        success: success
-    });
-}
-
-function _getJson(url, data, success){
-    jQuery.ajax({
-        url: url + data,
-        type: 'POST',
-        dataType: 'json',
-        success: success
-    });
-}
-
-function _createProxyListener (listener, scope, args) {
-
-    return function () {
-
-        return listener.call(scope, args);
-
-    }
-
-}
