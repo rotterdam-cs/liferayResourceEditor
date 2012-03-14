@@ -63,20 +63,26 @@ public class MessageSourcePersistenceImpl extends PersistenceImpl<MessageSource>
 
     @Override
     public void updateThroughHQL(final MessageSource messageSource) {
-        getHibernateTemplate().execute(new HibernateCallback() {
-            @Override
-            public Object doInHibernate(Session session) throws HibernateException, SQLException {
-                Query hql = session.createQuery("update MessageSource ms set ms.value = :value where ms.key = :key and ms.locale = :locale");
 
-                hql.setString("value", messageSource.getValue());
+        //this is workaround of PostgreSQL DB
+        //By default Hibernate for @Lob in PortgreSQL creates separate table with id in appropriate table
+        //That's why we can't be sure whether @Lob is inlined into table or not
+        MessageSource messageSourceDB = getHibernateTemplate().execute(new HibernateCallback<MessageSource>() {
+            @Override
+            public MessageSource doInHibernate(Session session) throws HibernateException, SQLException {
+                Query hql = session.createQuery("select ms from MessageSource ms where  ms.key = :key and  ms.locale = :locale");
+
                 hql.setString("key", messageSource.getKey());
                 hql.setString("locale", messageSource.getLocale());
 
-                hql.executeUpdate();
-
-                return null;
+                return (MessageSource)hql.uniqueResult();
             }
         });
+
+        messageSourceDB.setValue(messageSource.getValue());
+
+        update(messageSourceDB);
+
     }
 
     @Override

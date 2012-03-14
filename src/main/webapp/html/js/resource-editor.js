@@ -188,7 +188,7 @@
 
                     $.each(obj.source, function (sIdx, sourceItm) {
                         firstKey = sourceItm;
-                        return;
+                        return false;
                     });
 
                     var tr = $('<tr/>');
@@ -221,7 +221,7 @@
                     $.each(obj.source, function (sIdx, sourceItm) {
                         var option =  $('<option/>',{
                             'data-key': obj.key,
-                            'data-value': '',
+                            'data-value': ' ',
                             value:sourceItm,
                             text: sIdx
                         });

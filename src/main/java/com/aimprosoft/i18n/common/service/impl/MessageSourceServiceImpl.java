@@ -58,20 +58,31 @@ public class MessageSourceServiceImpl implements MessageSourceService {
 
     @Override
     public String getMSWJson(int start, int end) {
-        String json ="{\"totalRecords\":\"" + getMessageSourcesCount() + "\","
-                + "\"start\":\"" + start + "\","
-                + "\"records\":" + getMessageSourceWrappers(start, end)
-                + "}";
-        return json;
+        return new StringBuilder()
+                .append("{\"totalRecords\":\"")
+                .append(getMessageSourcesCount())
+                .append("\",")
+                .append("\"start\":\"")
+                .append(start)
+                .append("\",")
+                .append("\"records\":")
+                .append(getMessageSourceWrappers(start, end))
+                .append("}")
+                .toString();
     }
 
     @Override
     public String getMessageSourceWrappers(int start, int end) {
-        List<MessageSource> messageSourceList = persistence.getMessageSourceList(start, end);
+        try {
+            List<MessageSource> messageSourceList = persistence.getMessageSourceList(start, end);
 
-        List<MessageSourceWrapper> messageSourceWrapperList = wrapMessageSources(messageSourceList);
+            List<MessageSourceWrapper> messageSourceWrapperList = wrapMessageSources(messageSourceList);
 
-        return getMSWrappersJSON(messageSourceWrapperList);
+            return getMSWrappersJSON(messageSourceWrapperList);
+        } catch (Exception e) {
+            _logger.error("Cannot get resource cause: " + e.getMessage(), e);
+        }
+        return "[]";
     }
 
     @Override
