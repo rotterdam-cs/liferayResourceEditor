@@ -9,22 +9,24 @@
         },
 
         _getObjById:function (id) {
-            return jQuery('#' + id);
+            return $('#' + id);
         },
 
         _sendAjax:function (url, data, success) {
-            jQuery.ajax({
+            $.ajax({
                 url:url,
                 type:'POST',
+                mimeType:'text/html;charset=UTF-8',
                 data:'data=' + data + '&rand=' + Math.random(),
                 success:success
             });
         },
 
         _getJson:function (url, data, success) {
-            jQuery.ajax({
+            $.ajax({
                 url:url + data,
                 type:'POST',
+                mimeType:'text/html;charset=UTF-8',
                 dataType:'json',
                 success:success
             });
@@ -177,30 +179,73 @@
 
                 var editor = $globalScope;
                 var contentBox = Utils._getObjById(Utils._getRealId(editor.configuration.namespace, editor.mswContentId));
-                var content = '<table>';
-                jQuery.each(json.records, function (idx, obj) {
+                var contentTable = $('<table/>');
+
+                $.each(json.records, function(idx, obj){
+
                     var inputId = editor.configuration.namespace + '_resource_' + idx;
                     var firstKey = '';
-                    jQuery.each(obj.source, function (sIdx, sourceItm) {
+
+                    $.each(obj.source, function (sIdx, sourceItm) {
                         firstKey = sourceItm;
                         return;
                     });
-                    content += '<tr>';
-                    content += '<td><input type="text" value="' + obj.key + '" readonly></td>';
-                    content += '<td><input class="content" id="' + inputId + '" type="text" name="' + obj.key
-                        + '" value="' + firstKey + '"></td>';
-                    content += '<td><select name="' + obj.key + '">';
-                    jQuery.each(obj.source, function (sIdx, sourceItm) {
-                        content += '<option data-key="'+obj.key+'" data-value="" value="' + sourceItm + '">' + sIdx + '</option>';
+
+                    var tr = $('<tr/>');
+                    var keyInput = $('<input/>',{
+                        type:'text',
+                        value:obj.key,
+                        readonly:''
                     });
-                    content += '</select></td>';
-                    content += '<td><a class="delete" href="#">'+'<img title=\"Delete\" alt=\"Delete\" src=\"/html/themes/classic/images/common/delete.png\" class=\"icon\">'+'</a></td>';
-                    content += '</tr>';
+
+                    var td1 = $('<td/>');
+                    td1.append(keyInput);
+                    tr.append(td1);
+
+                    var resourceInput = $('<input/>',{
+                        'class':'content',
+                        id: inputId,
+                        type:'text',
+                        name:obj.key,
+                        value:firstKey
+                    });
+
+                    var td2 = $('<td/>');
+                    td2.append(resourceInput);
+                    tr.append(td2);
+
+                    var select = $('<select/>', {
+                        name: obj.key
+                    });
+
+                    $.each(obj.source, function (sIdx, sourceItm) {
+                        var option =  $('<option/>',{
+                            'data-key': obj.key,
+                            'data-value': '',
+                            value:sourceItm,
+                            text: sIdx
+                        });
+                        select.append(option);
+                    });
+
+                    var td3 = $('<td/>');
+                    td3.append(select);
+                    tr.append(td3);
+
+                    var delButton = $('a', {
+                        'class': 'delete',
+                        href: '#',
+                        text: '<img title=\"Delete\" alt=\"Delete\" src=\"/html/themes/classic/images/common/delete.png\" class=\"icon\">'
+                    });
+
+                    var td4 = $('<td/>');
+                    td4.append(delButton);
+                    tr.append(td4);
+
+                    contentTable.append(tr);
+
                 });
-                content += '</table>';
-                contentBox
-                    .empty()
-                    .append(content);
+                contentBox.empty().append(contentTable);
             },
 
             //When select changed set MessageSource value to input from selected option

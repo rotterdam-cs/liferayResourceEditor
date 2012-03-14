@@ -7,6 +7,7 @@
         jQuery.ajax({
             url: '${resourceContentURL}' + '&startIndex=0&pageSize=10',
             type: 'POST',
+            mimeType:'text/html;charset=UTF-8',
             dataType: 'json',
             success: init
         });
