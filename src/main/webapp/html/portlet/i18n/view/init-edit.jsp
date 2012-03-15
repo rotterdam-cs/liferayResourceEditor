@@ -4,7 +4,9 @@
 <script type="text/javascript">
     jQuery(document).ready(function($){
         var editResourceKey = new EditResourceKey({
-            namespace : '<portlet:namespace/>'
+            namespace : '<portlet:namespace/>',
+            saveURL: '${saveURL}',
+            defaultURL: '${defaultURL}'
         });
     });
 </script>

@@ -14,10 +14,10 @@
 
         _sendAjax:function (url, data, success) {
             $.ajax({
-                url:url,
+                url:url + '&rand=' + Math.random(),
                 type:'POST',
                 mimeType:'text/html;charset=UTF-8',
-                data:'data=' + data + '&rand=' + Math.random(),
+                data:'data=' + data,
                 success:success
             });
         },
@@ -30,17 +30,6 @@
                 dataType:'json',
                 success:success
             });
-        },
-
-        //TODO use jQuery.proxy instead
-        _createProxyListener:function (listener, scope, args) {
-
-            return function () {
-
-                return listener.call(scope, args);
-
-            }
-
         }
     };
 
@@ -50,6 +39,7 @@
         this.newButtonClass = 'new-button';
         this.paginatorId = "paginator";
         this.paginContainerId = "paginContainer";
+        this.loadImgId = "loadImg";
         this.defauldSize = 10;
         $this = this;
         $globalScope = this;
@@ -98,7 +88,7 @@
 
                 contentBox.on('click', 'a.delete', editor._delete);
 
-                $('.' + editor.saveButtonClass).on('click', Utils._createProxyListener(editor._saveResources, editor));
+                $('.' + editor.saveButtonClass).on('click', $.proxy(editor._saveResources, editor));
 
                 $('.' + editor.newButtonClass).on('click', editor._editResource);
 
@@ -109,6 +99,7 @@
 
             //get selected page number and reload content using it
             _afterPaginClicked:function(){
+                $globalScope._toggleImg(true);
                 var $a = $(this);
                 var text = $a.text();
                 var idx = 1;
@@ -121,6 +112,24 @@
                     idx = text;
                 }
                 $globalScope._reloadContent(idx);
+            },
+
+            _toggleImg: function(show){
+                var imgContainer = Utils._getObjById(Utils._getRealId($globalScope.configuration.namespace, $globalScope.loadImgId));
+                if(show){
+                    imgContainer.removeClass('none');
+                }else{
+                    imgContainer.addClass('none');
+                }
+            },
+
+            _toggleSaveButton: function(disable){
+                var saveButton = $('.' + $globalScope.saveButtonClass);
+                if(disable){
+                    saveButton.attr('disabled', true);
+                }else{
+                    saveButton.removeAttr('disabled');
+                }
             },
 
             //init pagination
@@ -247,6 +256,8 @@
 
                 });
                 contentBox.empty().append(contentTable);
+                editor._toggleImg(false);
+                editor._toggleSaveButton(false);
             },
 
             //When select changed set MessageSource value to input from selected option
@@ -279,15 +290,19 @@
             //get all options that was changed, serialize them and post via ajax
             _saveResources:function () {
                 var editor = this;
-                var json = '[';
                 var changedOptionArr = $('option[data-value=changed]');
+                var arr = [];
                 $.each(changedOptionArr, function(idx, option){
                     var $option = $(option);
-                    json += '{"key":"' + $option.attr('data-key') + '","value":"' + $option.val() + '","locale":"' + $option.text() +'"},';
+                    arr[arr.length] = {
+                        'key':$option.attr('data-key'),
+                        'value': $option.val(),
+                        'locale': $option.text()
+                    };
                 });
-                json = json.slice(0, -1);
-                json += ']';
-                Utils._sendAjax(editor.configuration.uploadResourcesURL, json, editor._afterResourcesUploaded)
+                var json = JSON.stringify(arr);
+                Utils._sendAjax(editor.configuration.uploadResourcesURL, json, editor._afterResourcesUploaded);
+                editor._toggleSaveButton(true);
             },
 
             //get current selected page and reload content using it
@@ -314,7 +329,7 @@
             },
             _bindEvents: function(){
                 var editor = this;
-                $('.' + editor.saveButtonClass).on('click', Utils._createProxyListener(editor._saveResources, editor));
+                $('.' + editor.saveButtonClass).on('click', $.proxy(editor._saveResources, editor));
             },
 
             _saveResources: function(){
@@ -324,9 +339,7 @@
                 var isKeyValid = editor._validateKey(key);
                 if(isKeyValid){
                     var json = editor._serializeTable();
-                    var form = Utils._getObjById(Utils._getRealId(editor.configuration.namespace, editor.formId));
-                    form.children("input[name=data]").val(json);
-                    form.submit();
+                    Utils._sendAjax(editor.configuration.saveURL, json, function(){window.location.href = editor.configuration.defaultURL;});
                 }
 
             },
@@ -334,15 +347,16 @@
             _serializeTable: function(){
                 var trArr = Utils._getObjById(Utils._getRealId($this.configuration.namespace, $this.contentId)).find('tr');
                 var keyVal = Utils._getObjById(Utils._getRealId($this.configuration.namespace, $this.keyInputId)).val();
-                var json = '[';
+                var arr = [];
                 $.each(trArr, function(idx, tr){
                     var $tr = $(tr);
-                    json += '{"key":"' + keyVal +'","value":"' + $tr.children('td').eq(0).children('input[type=text]').val()
-                        + '","locale":"' + $tr.children('td').eq(1).children('input[type=text]').val() + '"},';
+                    arr[arr.length] = {
+                        'key': keyVal,
+                        'value': $tr.children('td').eq(0).children('input[type=text]').val(),
+                        'locale': $tr.children('td').eq(1).children('input[type=text]').val()
+                    }
                 });
-                json = json.slice(0, -1);
-                json += ']';
-                return json;
+                return JSON.stringify(arr);
             },
 
             _validateKey: function(key){

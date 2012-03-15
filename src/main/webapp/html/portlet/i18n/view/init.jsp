@@ -4,6 +4,8 @@
 
     jQuery(document).ready(function($){
 
+        jQuery('#${namespace}loadImg').removeClass('none');
+
         jQuery.ajax({
             url: '${resourceContentURL}' + '&startIndex=0&pageSize=10',
             type: 'POST',

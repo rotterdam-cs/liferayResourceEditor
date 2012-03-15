@@ -14,6 +14,4 @@
     <portlet:param name="render" value="edit"/>
 </portlet:renderURL>
 
-<portlet:renderURL var="saveURL">
-    <portlet:param name="render" value="save"/>
-</portlet:renderURL>
+<portlet:resourceURL var="saveURL" id="save"/>

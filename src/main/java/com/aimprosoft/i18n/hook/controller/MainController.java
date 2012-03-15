@@ -67,8 +67,8 @@ public class MainController extends BaseController {
         mov.addObject("locales", localeService.getSortedLocales());
         return mov;
     }
-    
-    @RequestMapping(params = "render=save")
+
+    @ResourceMapping("save")
     public String save(@RequestParam("data") String data){
         messageSourceService.saveMessageSources(data, true);
         return "/view/view";

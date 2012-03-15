@@ -11,3 +11,17 @@
 .none{
     display: none;
 }
+
+.activeLoad{
+    position: absolute;
+    top: 40%;
+    left: 170px;
+}
+
+.portletBlock{
+    position: relative;
+}
+
+.msw-table-container{
+    min-height: 50px;
+}
