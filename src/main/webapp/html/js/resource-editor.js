@@ -32,6 +32,7 @@
             });
         },
 
+        //TODO use jQuery.proxy instead
         _createProxyListener:function (listener, scope, args) {
 
             return function () {

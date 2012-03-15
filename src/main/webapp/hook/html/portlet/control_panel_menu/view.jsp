@@ -28,6 +28,11 @@
 	<liferay-ui:panel-container extended="<%= true %>" id="controlPanelMenuAddContentPanelContainer" persistState="<%= true %>">
 
 		<%
+            /*====   PATCH   ====*/
+        Portlet customPortlet = PortletLocalServiceUtil.getPortletById(10154, "resourceeditorhook_WAR_resourceeditorhook");
+        customPortlet.setControlPanelEntryCategory(PortletCategoryKeys.CONTENT);
+            /*====================*/
+
 		String ppid = GetterUtil.getString((String)request.getAttribute("control_panel.jsp-ppid"), layoutTypePortlet.getStateMaxPortletId());
 
 		String category = PortalUtil.getControlPanelCategory(ppid, themeDisplay);
@@ -35,11 +40,6 @@
 		String[] allCategories = PortletCategoryKeys.ALL;
 
 		String controlPanelCategory = HttpUtil.getParameter(PortalUtil.getCurrentURL(request), "controlPanelCategory", false);
-
-        /*====   PATCH   ====*/
-        Portlet customPortlet = PortletLocalServiceUtil.getPortletById(10154, "resourceeditorhook_WAR_resourceeditorhook");
-        customPortlet.setControlPanelEntryCategory(PortletCategoryKeys.CONTENT);
-        /*====================*/
 
 		if (Validator.isNotNull(controlPanelCategory)) {
 			allCategories = new String[] {controlPanelCategory};

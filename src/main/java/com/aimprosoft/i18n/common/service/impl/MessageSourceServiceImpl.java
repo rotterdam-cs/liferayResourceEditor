@@ -30,7 +30,7 @@ public class MessageSourceServiceImpl implements MessageSourceService {
 
     @Autowired
     private ApplicationPropsBean props;
-    //    private static CacheService cacheService = ObjectFactory.getBean("ehCacheService");
+
     @Autowired
     @Qualifier(value = "ehCacheService")
     private CacheService cacheService;
