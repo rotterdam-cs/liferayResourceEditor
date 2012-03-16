@@ -5,6 +5,8 @@ import com.aimprosoft.i18n.common.persistence.MessageSourcePersistence;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.stereotype.Service;
 
@@ -30,17 +32,12 @@ public class MessageSourcePersistenceImpl extends PersistenceImpl<MessageSource>
 
     @Override
     public MessageSource getMessage(final String key, final String locale) {
-        return getHibernateTemplate().execute(new HibernateCallback<MessageSource>() {
-            @Override
-            public MessageSource doInHibernate(Session session) throws HibernateException, SQLException {
-                Query query = session.createQuery("select ms from MessageSource ms where ms.key = :key and ms.locale = :locale");
-
-                query.setParameter("key", key);
-                query.setParameter("locale", locale);
-
-                return (MessageSource) query.uniqueResult();
-            }
-        });
+        DetachedCriteria criteria = DetachedCriteria.forClass(MessageSource.class);
+        criteria
+                .add(Restrictions.eq("key", key))
+                .add(Restrictions.eq("locale", locale));
+        List result = getHibernateTemplate().findByCriteria(criteria);
+        return  result == null ? null : (MessageSource)result.get(0);
     }
 
     @Override

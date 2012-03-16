@@ -7,6 +7,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.InvocationTargetException;
+
 @Service
 public class ObjectFactory implements ApplicationContextAware, InitializingBean{
     
@@ -25,7 +27,7 @@ public class ObjectFactory implements ApplicationContextAware, InitializingBean{
             _logger.fatal("It is impossible using ObjectFactory");
         }
     }
-    
+
     public static <T> T getBean(Class<T> beanClass){
         return _applicationContext.getBean(beanClass);
     }

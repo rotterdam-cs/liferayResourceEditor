@@ -242,11 +242,19 @@
                     td3.append(select);
                     tr.append(td3);
 
-                    var delButton = $('a', {
+                    var delButton = $('<a/>', {
                         'class': 'delete',
-                        href: '#',
-                        text: '<img title=\"Delete\" alt=\"Delete\" src=\"/html/themes/classic/images/common/delete.png\" class=\"icon\">'
+                        'href': '#'
                     });
+
+                    var img = $('<img/>',{
+                        title: 'Delete',
+                        alt: 'Delete',
+                        src: '/html/themes/classic/images/common/delete.png',
+                        'class': 'icon'
+                    });
+
+                    delButton.append(img);
 
                     var td4 = $('<td/>');
                     td4.append(delButton);

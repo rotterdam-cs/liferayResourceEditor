@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.*;
 
-@Service
+@Service("messageSourceService")
 public class MessageSourceServiceImpl implements MessageSourceService {
 
     private Logger _logger = Logger.getLogger(getClass());
