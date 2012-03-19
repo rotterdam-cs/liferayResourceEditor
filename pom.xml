@@ -61,10 +61,9 @@
         <maven.test.skip>true</maven.test.skip>
 
         <war.name>resource-editor-hook</war.name>
-        <!--Tomcat-->
-        <liferay.tomcat.directory>/home/n1ck/_Work/_Liferay/RCS-lr-6.1.0/liferay-portal-6.1.0-ce-ga1</liferay.tomcat.directory>
-        <tomcat.directory>${liferay.tomcat.directory}/tomcat-7.0.23</tomcat.directory>
-        <tomcat.deploy.dir>${liferay.tomcat.directory}/deploy</tomcat.deploy.dir>
+        <!--Liferay-->
+        <liferay.directory>/home/n1ck/_Work/_Liferay/RCS-lr-6.1.0/liferay-portal-6.1.0-ce-ga1</liferay.directory>
+        <deploy.dir>${liferay.directory}/deploy</deploy.dir>
     </properties>
 
     <repositories>
@@ -421,31 +420,79 @@
         <plugins>
 
             <plugin>
-                <inherited>true</inherited>
                 <artifactId>maven-resources-plugin</artifactId>
+                <version>2.5</version>
+                <inherited>true</inherited>
                 <configuration>
                     <encoding>UTF-8</encoding>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>copy-resources</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${liferay.directory}/tomcat-7.0.23/webapps/ROOT/WEB-INF/classes/com/liferay/portal/kernel/util</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>target/classes/com/liferay/portal/kernel/util/</directory>
+                                    <includes>
+                                        <include>ResourceBundleUtil.class</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
                 <inherited>true</inherited>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
                 <configuration>
                     <source>${jdk.source}</source>
                     <target>${jdk.target}</target>
                     <optimize>true</optimize>
                     <showDeprecation>${show.deprecations}</showDeprecation>
                     <showWarnings>true</showWarnings>
+                    <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
 
             <plugin>
                 <artifactId>maven-war-plugin</artifactId>
+                <version>2.2</version>
                 <configuration>
+                    <packagingExcludes>WEB-INF/**/kernel/util/*</packagingExcludes>
                     <warName>${war.name}</warName>
-                    <outputDirectory>${tomcat.deploy.dir}</outputDirectory>
+                    <outputDirectory>${deploy.dir}</outputDirectory>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <finalName>resource-editor-integration</finalName>
+                    <includes>
+                        <include>**/liferay/portal/kernel/**</include>
+                    </includes>
+                    <excludes>
+                        <exclude>**/util/ResourceBundleUtil.class</exclude>
+                    </excludes>
+                    <outputDirectory>${liferay.directory}/tomcat-7.0.23/lib/ext</outputDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
         </plugins>

@@ -1,6 +1,7 @@
 <%@include file="init.jsp" %>
 
 <div class="portletBlock">
+    <div id="${namespace}messageContainer"></div>
     <div id="${namespace}loadImg" class="none activeLoad">
         <img src="/html/themes/control_panel/images/application/loading_indicator.gif"/>
     </div>

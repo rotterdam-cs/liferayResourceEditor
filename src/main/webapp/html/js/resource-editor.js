@@ -18,6 +18,7 @@
                 type:'POST',
                 mimeType:'text/html;charset=UTF-8',
                 data:'data=' + data,
+                dataType: 'json',
                 success:success
             });
         },
@@ -30,6 +31,14 @@
                 dataType:'json',
                 success:success
             });
+        },
+
+        _toggleElementWithDelay:function(element, view, delay){
+            $(element)
+                .show(view)
+                .delay(delay)
+                .hide(view);
+
         }
     };
 
@@ -40,6 +49,7 @@
         this.paginatorId = "paginator";
         this.paginContainerId = "paginContainer";
         this.loadImgId = "loadImg";
+        this.messageContainerId = "messageContainer";
         this.defauldSize = 10;
         $this = this;
         $globalScope = this;
@@ -316,7 +326,27 @@
             //get current selected page and reload content using it
             _afterResourcesUploaded: function(response){
                 var currentPage = $('.jPag-current').text();
+                $globalScope._writeMessages(response);
                 $globalScope._reloadContent(currentPage);
+            },
+
+            _writeMessages: function(data){
+                var messageContainer = Utils._getObjById(Utils._getRealId($globalScope.configuration.namespace, $globalScope.messageContainerId));
+                messageContainer.empty();
+                $.each(data, function(idx, msg){
+                    var msgClass = '';
+                    if(msg.error){
+                        msgClass = 'portlet-msg-error';
+                    }else{
+                        msgClass = 'portlet-msg-success';
+                    }
+                    var msgSpan = $('<span/>', {
+                        'class': msgClass,
+                        text: msg.message
+                    });
+                    messageContainer.append(msgSpan);
+                });
+                Utils._toggleElementWithDelay(messageContainer, 'slow', 5000);
             }
         }
     });
@@ -347,9 +377,14 @@
                 var isKeyValid = editor._validateKey(key);
                 if(isKeyValid){
                     var json = editor._serializeTable();
-                    Utils._sendAjax(editor.configuration.saveURL, json, function(){window.location.href = editor.configuration.defaultURL;});
+                    Utils._sendAjax(editor.configuration.saveURL, json, $.proxy(editor._redirectBack, editor));
                 }
 
+            },
+
+            _redirectBack: function(){
+                var editor = $this;
+                window.location.href = editor.configuration.defaultURL;
             },
 
             _serializeTable: function(){

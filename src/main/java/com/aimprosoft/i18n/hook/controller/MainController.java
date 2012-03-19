@@ -1,5 +1,6 @@
 package com.aimprosoft.i18n.hook.controller;
 
+import com.aimprosoft.i18n.common.message.CustomMessage;
 import com.aimprosoft.i18n.common.persistence.MessageSourcePersistence;
 import com.aimprosoft.i18n.common.service.LocaleService;
 import com.aimprosoft.i18n.common.service.MessageSourceService;
@@ -16,6 +17,7 @@ import javax.portlet.PortletRequest;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
 import java.io.IOException;
+import java.util.List;
 
 @Controller
 @RequestMapping("VIEW")
@@ -52,8 +54,9 @@ public class MainController extends BaseController {
     }
 
     @ResourceMapping("uploadResources")
-    public void uploadResources(@RequestParam("data") String data) {
-        messageSourceService.saveMessageSources(data, false);
+    public void uploadResources(@RequestParam("data") String data, ResourceResponse response) {
+        List<CustomMessage> customMessages = messageSourceService.saveMessageSources(data, false);
+        writeResponse(response, messageSourceService.getCMJson(customMessages));
     }
 
     @ResourceMapping("delete")
@@ -69,8 +72,7 @@ public class MainController extends BaseController {
     }
 
     @ResourceMapping("save")
-    public String save(@RequestParam("data") String data){
+    public void save(@RequestParam("data") String data){
         messageSourceService.saveMessageSources(data, true);
-        return "/view/view";
     }
 }

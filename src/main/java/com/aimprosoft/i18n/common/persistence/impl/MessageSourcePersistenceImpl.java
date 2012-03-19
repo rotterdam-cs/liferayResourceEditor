@@ -37,7 +37,7 @@ public class MessageSourcePersistenceImpl extends PersistenceImpl<MessageSource>
                 .add(Restrictions.eq("key", key))
                 .add(Restrictions.eq("locale", locale));
         List result = getHibernateTemplate().findByCriteria(criteria);
-        return  result == null ? null : (MessageSource)result.get(0);
+        return  result.isEmpty() ? null : (MessageSource)result.get(0);
     }
 
     @Override

@@ -24,4 +24,5 @@ public interface MessageSourceService {
 
     Integer getMessageSourcesCount();
 
+    String getCMJson(List<CustomMessage> customMessages);
 }

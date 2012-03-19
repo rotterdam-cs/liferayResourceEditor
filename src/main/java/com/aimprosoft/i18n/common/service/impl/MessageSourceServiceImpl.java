@@ -24,6 +24,8 @@ import java.util.*;
 public class MessageSourceServiceImpl implements MessageSourceService {
 
     private Logger _logger = Logger.getLogger(getClass());
+    
+    public static final String EMPTY_JSON = "[]";
 
     @Autowired
     private MessageSourcePersistence persistence;
@@ -82,7 +84,7 @@ public class MessageSourceServiceImpl implements MessageSourceService {
         } catch (Exception e) {
             _logger.error("Cannot get resource cause: " + e.getMessage(), e);
         }
-        return "[]";
+        return EMPTY_JSON;
     }
 
     @Override
@@ -107,8 +109,13 @@ public class MessageSourceServiceImpl implements MessageSourceService {
             }
         } catch (IOException e) {
             _logger.error("Cannot save data cause: " + e.getMessage(), e);
+            return getCustomMessageList(new CustomMessage("resources not saved", true));
         }
-        return Collections.emptyList();
+        return getCustomMessageList(new CustomMessage("resources saved", false));
+    }
+
+    private List<CustomMessage> getCustomMessageList(CustomMessage ... customMessages) {
+        return new LinkedList<CustomMessage>(Arrays.asList(customMessages));
     }
 
     private List<MessageSource> deserializeMessageSources(String data) throws IOException {
@@ -127,6 +134,16 @@ public class MessageSourceServiceImpl implements MessageSourceService {
     @Override
     public Integer getMessageSourcesCount() {
         return persistence.selectMessageSourcesCount();
+    }
+
+    @Override
+    public String getCMJson(List<CustomMessage> customMessages) {
+        try {
+            return new ObjectMapper().writeValueAsString(customMessages);
+        } catch (IOException e) {
+            _logger.error("Cannot serialize CustomMessage list, cause: " + e.getMessage(), e);
+        }
+        return EMPTY_JSON;
     }
 
     private String getMSWrappersJSON(List<MessageSourceWrapper> messageSourceWrapperList) {
