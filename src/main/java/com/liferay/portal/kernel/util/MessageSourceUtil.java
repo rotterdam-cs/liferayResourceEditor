@@ -18,7 +18,7 @@ public class MessageSourceUtil {
                 if(locale == null){
                     locale  = Locale.US;
                 }
-                Object/*com.aimprosoft.i18n.common.service.MessageSourceService*/ messageSourceService = ObjectFactory.getBean("messageSourceService");
+                Object/*com.rcs.i18n.common.service.MessageSourceService*/ messageSourceService = ObjectFactory.getBean("messageSourceService");
                 Object value = messageSourceService.getClass().getMethod("getMessage", String.class, Locale.class).invoke(messageSourceService, key, locale);
                 return (String) value;
         } catch (Exception e) {

@@ -20,7 +20,7 @@
 
         <property name="annotatedClasses">
             <list>
-                <value>com.aimprosoft.i18n.common.model.impl.MessageSource</value>
+                <value>com.rcs.i18n.common.model.impl.MessageSource</value>
             </list>
         </property>
 
@@ -36,7 +36,7 @@
 
     <tx:annotation-driven mode="proxy" transaction-manager="transactionManager" proxy-target-class="true"/>
 
-    <bean name="persistence" class="com.aimprosoft.i18n.common.persistence.impl.PersistenceImpl"
+    <bean name="persistence" class="com.rcs.i18n.common.persistence.impl.PersistenceImpl"
           scope="singleton" abstract="true">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>

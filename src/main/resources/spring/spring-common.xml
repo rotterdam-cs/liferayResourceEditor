@@ -13,7 +13,7 @@
 
     <context:property-placeholder location="classpath:/application.properties"/>
 
-    <context:component-scan base-package="com.aimprosoft.i18n.common"/>
+    <context:component-scan base-package="com.rcs.i18n.common"/>
 
     <bean class="net.sf.ehcache.CacheManager" factory-method="getInstance"/>
 

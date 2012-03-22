@@ -7,7 +7,7 @@
 
     <portlet id="resource-editor-hook">
         <portlet-name>resource-editor-hook</portlet-name>
-        <display-name>Resource Editor Hook</display-name>
+        <display-name>Resource Editor</display-name>
 
         <portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
 
@@ -23,8 +23,8 @@
         </supports>
 
         <portlet-info>
-            <title>Resource Editor Hook</title>
-            <short-title>Resource Editor Hook</short-title>
+            <title>Resource Editor</title>
+            <short-title>Resource Editor</short-title>
             <keywords>resource,editor,hook</keywords>
         </portlet-info>
 
