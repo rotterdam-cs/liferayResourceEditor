@@ -25,7 +25,7 @@
 
         _getJson:function (url, data, success) {
             $.ajax({
-                url:url + data,
+                url:url + data + '&rand=' + Math.random(),
                 type:'POST',
                 mimeType:'text/html;charset=UTF-8',
                 dataType:'json',
@@ -51,6 +51,14 @@
         this.loadImgId = "loadImg";
         this.messageContainerId = "messageContainer";
         this.defauldSize = 10;
+
+        this.searchButtonId  = "searchButton";
+        this.onKeyInput      = "onKeyInput";
+        this.onMessageInput  = "onMessageInput";
+        this.onMessageSelect = "onMessageSelect";
+
+        this.extraData = "";
+
         $this = this;
         $globalScope = this;
         this._init(config);
@@ -103,23 +111,57 @@
                 $('.' + editor.newButtonClass).on('click', editor._editResource);
 
                 var paginatorContainer = Utils._getObjById(Utils._getRealId(editor.configuration.namespace, editor.paginContainerId));
-                paginatorContainer.on('click', 'a', editor._afterPaginClicked);
+                paginatorContainer.find("a").each(
+                    function(){
+                        $(this).bind("click", editor._afterPaginClicked);
+                    }
+                );
 
+                var searchButton = Utils._getObjById(Utils._getRealId(editor.configuration.namespace, editor.searchButtonId));
+
+                searchButton.on("click", editor._searchTranslations);
+            },
+
+
+            _searchTranslations: function() {
+
+                var scope = $globalScope;
+
+                var onKeyText = Utils._getObjById(Utils._getRealId(scope.configuration.namespace, scope.onKeyInput)).val();
+                var onMessageText = Utils._getObjById(Utils._getRealId(scope.configuration.namespace, scope.onMessageInput)).val();
+                var messageLocale = Utils._getObjById(Utils._getRealId(scope.configuration.namespace, scope.onMessageSelect)).val();
+
+                scope.extraData = "&resourcekey=" + onKeyText + "&resourcemessage=" + onMessageText + "&resourcelocale=" + messageLocale;
+
+                $('.jPag-current').removeClass('jPag-current');
+
+                $(".jPag-pages").children().eq(0).addClass("jPag-current");
+
+                var currentPage = $('.jPag-current').text();
+
+                scope._searchContent(currentPage, scope.extraData);
             },
 
             //get selected page number and reload content using it
             _afterPaginClicked:function(){
+
                 $globalScope._toggleImg(true);
+
                 var $a = $(this);
+
                 var text = $a.text();
                 var idx = 1;
-                if(text == 'First'){
 
-                }else if(text == 'Last'){
+                if(text === 'First'){
+
+                }else if(text === 'Last'){
+
                     var last = Utils._getObjById(Utils._getRealId($globalScope.configuration.namespace, $globalScope.paginatorId)).find('li:last-child');
                     idx = last.text();
+
                 } else {
                     idx = text;
+
                 }
                 $globalScope._reloadContent(idx);
             },
@@ -160,6 +202,12 @@
                     images					: false,
                     mouse					: 'press'
                 });
+                var paginatorContainer = Utils._getObjById(Utils._getRealId($globalScope.configuration.namespace, $globalScope.paginContainerId));
+                paginatorContainer.find("a").each(
+                    function(){
+                        $(this).bind("click", $globalScope._afterPaginClicked);
+                    }
+                );
             },
 
             //go to resource edit page
@@ -181,10 +229,30 @@
                 window.location.reload();
             },
 
-            _reloadContent: function(page){
+            _searchContent: function(page,extraData) {
                 var editor = this;
                 var data = '&startIndex=' + (page*this.defauldSize - this.defauldSize)  + '&pageSize=' + this.defauldSize;
-                var json = Utils._getJson(editor.configuration.resourceContentURL, data, editor._viewContent);
+                if (extraData !== undefined)
+                    data += extraData;
+                var json = Utils._getJson(editor.configuration.resourceContentURL, data, editor._vewSearchContent);
+            },
+
+            _vewSearchContent: function(json) {
+                var scope = $globalScope;
+                scope._viewContent(json);
+                scope._viewPagination(json.totalRecords, json.start, scope.defauldSize);
+            },
+
+            _reloadContent: function(page){
+                var editor = this;
+                if (page === "0")
+                    page = 1;
+                var startIndex = page*this.defauldSize - this.defauldSize;
+                var pageSize = this.defauldSize;
+                var data = '&startIndex=' + startIndex  + '&pageSize=' + pageSize;
+                if ($globalScope.extraData !== undefined)
+                    data += $globalScope.extraData;
+                Utils._getJson(editor.configuration.resourceContentURL, data, editor._viewContent);
             },
 
             //view content and pagination
@@ -195,13 +263,14 @@
                 editor._viewPagination(json.totalRecords, json.start, this.defauldSize);
             },
 
-            _viewContent: function(json){
+            _viewContent: function(json) {
 
                 var editor = $globalScope;
                 var contentBox = Utils._getObjById(Utils._getRealId(editor.configuration.namespace, editor.mswContentId));
-                var contentTable = $('<table/>');
 
-                $.each(json.records, function(idx, obj){
+                var html = "<table>";
+
+                $.each(json.records, function(idx, obj) {
 
                     var inputId = editor.configuration.namespace + '_resource_' + idx;
                     var firstKey = '';
@@ -211,69 +280,32 @@
                         return false;
                     });
 
-                    var tr = $('<tr/>');
-                    var keyInput = $('<input/>',{
-                        type:'text',
-                        value:obj.key,
-                        readonly:''
-                    });
+                    var innerHtml = "<tr><td>";
 
-                    var td1 = $('<td/>');
-                    td1.append(keyInput);
-                    tr.append(td1);
+                    innerHtml += "<input type=\"text\" value=\"" + obj.key + "\" readonly=\"readonly\" />";
+                    innerHtml += "</td><td>";
 
-                    var resourceInput = $('<input/>',{
-                        'class':'content',
-                        id: inputId,
-                        type:'text',
-                        name:obj.key,
-                        value:firstKey
-                    });
+                    innerHtml += "<input type=\"text\" class=\"content\" value=\"" + firstKey + "\" id=\"" + inputId + "\" name=\"" + obj.key + "\" />";
+                    innerHtml += "</td><td>";
 
-                    var td2 = $('<td/>');
-                    td2.append(resourceInput);
-                    tr.append(td2);
-
-                    var select = $('<select/>', {
-                        name: obj.key
-                    });
+                    innerHtml += "<select name=\"" + obj.key + "\">";
 
                     $.each(obj.source, function (sIdx, sourceItm) {
-                        var option =  $('<option/>',{
-                            'data-key': obj.key,
-                            'data-value': ' ',
-                            value:sourceItm,
-                            text: sIdx
-                        });
-                        select.append(option);
+                        innerHtml += "<option data-key=\"" + obj.key + "\" data-value=\" \" value=\"" + sourceItm + "\">" + sIdx + "</option>";
                     });
 
-                    var td3 = $('<td/>');
-                    td3.append(select);
-                    tr.append(td3);
+                    innerHtml += "</select></td><td>";
 
-                    var delButton = $('<a/>', {
-                        'class': 'delete',
-                        'href': '#'
-                    });
+                    innerHtml += "<a class=\"delete\" href='\"#\"'><img src='/html/themes/classic/images/common/delete.png' alt='Delete' title='Delete' class='icon' /></a>";
 
-                    var img = $('<img/>',{
-                        title: 'Delete',
-                        alt: 'Delete',
-                        src: '/html/themes/classic/images/common/delete.png',
-                        'class': 'icon'
-                    });
+                    innerHtml += "</td><td></td></tr>";
 
-                    delButton.append(img);
-
-                    var td4 = $('<td/>');
-                    td4.append(delButton);
-                    tr.append(td4);
-
-                    contentTable.append(tr);
-
+                    html += innerHtml;
                 });
-                contentBox.empty().append(contentTable);
+
+                html += "</table>";
+
+                contentBox.empty().append($(html));
                 editor._toggleImg(false);
                 editor._toggleSaveButton(false);
             },

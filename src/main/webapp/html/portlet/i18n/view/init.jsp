@@ -19,6 +19,7 @@
                 namespace : '<portlet:namespace/>',
                 uploadResourcesURL: '${uploadResourcesURL}',
                 resourceContentURL: '${resourceContentURL}',
+                searchContentURL: '${searchContentURL}',
                 deleteURL: '${deleteURL}',
                 editURL: '${editURL}',
                 deleteMSG: '<liferay-ui:message key="delete"/>',

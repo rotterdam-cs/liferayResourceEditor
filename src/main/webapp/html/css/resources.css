@@ -1,3 +1,101 @@
+.filterTranslations {
+    display: block;
+    clear: both;
+    overflow: hidden;
+}
+
+.filterTranslationsGroup {
+    float: left;
+    display: inline;
+    overflow: hidden;
+}
+
+.filterTranslationsGroup .form-line {
+    display: block;
+    clear: both;
+    overflow: hidden;
+}
+
+.filterTranslationsGroup .form-line .left {
+    float: left;
+    text-align: left;
+    width: 150px;
+    margin: 5px;
+}
+
+.filterTranslationsGroup .form-line .center {
+    float: left;
+    text-align: left;
+    width: 210px;
+}
+
+.filterTranslationsGroup .form-line .center input {
+    width: 200px;
+    margin: 5px;
+}
+
+.filterTranslationsGroup .form-line .right {
+    float: left;
+    text-align: left;
+    width: 150px;
+    margin: 5px;
+}
+
+.advancedGroup {
+    float: right;
+    display: inline;
+    overflow: hidden;
+}
+
+.filterTranslations {
+    display: block;
+    clear: both;
+    overflow: hidden;
+}
+
+.filterTranslationsGroup {
+    float: left;
+    display: inline;
+    overflow: hidden;
+}
+
+.filterTranslationsGroup .form-line {
+    display: block;
+    clear: both;
+    overflow: hidden;
+}
+
+.filterTranslationsGroup .form-line .left {
+    float: left;
+    text-align: left;
+    width: 150px;
+    margin: 5px;
+}
+
+.filterTranslationsGroup .form-line .center {
+    float: left;
+    text-align: left;
+    width: 210px;
+}
+
+.filterTranslationsGroup .form-line .center input {
+    width: 200px;
+    margin: 5px;
+}
+
+.filterTranslationsGroup .form-line .right {
+    float: left;
+    text-align: left;
+    width: 150px;
+    margin: 5px;
+}
+
+.advancedGroup {
+    float: right;
+    display: inline;
+    overflow: hidden;
+}
+
 .resource-value{
     width: 200px;
     margin-left: 20px;

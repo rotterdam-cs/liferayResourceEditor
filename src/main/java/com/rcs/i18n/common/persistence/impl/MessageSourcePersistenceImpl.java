@@ -2,19 +2,24 @@ package com.rcs.i18n.common.persistence.impl;
 
 import com.rcs.i18n.common.model.impl.MessageSource;
 import com.rcs.i18n.common.persistence.MessageSourcePersistence;
+import org.apache.commons.lang.StringUtils;
+import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Service
-public class MessageSourcePersistenceImpl extends PersistenceImpl<MessageSource> implements MessageSourcePersistence {
+public class MessageSourcePersistenceImpl extends PersistenceImpl<MessageSource> implements MessageSourcePersistence{
     @Override
     public boolean isMessageSourceExist(final String key, final String locale) {
         return getHibernateTemplate().execute(new HibernateCallback<Boolean>() {
@@ -41,6 +46,15 @@ public class MessageSourcePersistenceImpl extends PersistenceImpl<MessageSource>
     }
 
     @Override
+    public List<MessageSource> findMessages(Collection keys) {
+        DetachedCriteria criteria = DetachedCriteria.forClass(MessageSource.class);
+        criteria
+                .add(Restrictions.in("key", keys))
+                .addOrder(Order.asc("key"));
+        return (List<MessageSource>)getHibernateTemplate().findByCriteria(criteria);
+    }
+
+    @Override
     public List<MessageSource> getMessageSourceList(final int start, final int end) {
         return getHibernateTemplate().execute(new HibernateCallback<List<MessageSource>>() {
             @Override
@@ -54,6 +68,41 @@ public class MessageSourcePersistenceImpl extends PersistenceImpl<MessageSource>
                     .setInteger("offset", start);
                 return sql.list();
 
+            }
+        });
+    }
+
+    @Override
+    public List<MessageSource> findMessageSourceList(final String key, final String value, final String locale, final int start, final int end) {
+        return getHibernateTemplate().execute(new HibernateCallback<List<MessageSource>>() {
+            @Override
+            public List<MessageSource> doInHibernate(Session session) throws HibernateException, SQLException {
+
+                String searchKey = key + "%";
+                String searchValue = value + "%";
+                String hqlQuery = "select distinct(m.key) from MessageSource m where ";
+                if (StringUtils.isBlank(value)) {
+                    hqlQuery += "m.key like :key";
+                } else if (StringUtils.isBlank(key)) {
+                    hqlQuery += "m.value like :value and m.locale = :locale";
+                } else {
+                    hqlQuery += "m.key like :key or (m.value like :value and m.locale = :locale)";
+                }
+                hqlQuery += " order by m.key";
+
+                Query query = session.createQuery(hqlQuery);
+                if (hqlQuery.contains(":key"))
+                    query.setString("key", searchKey);
+                if (hqlQuery.contains(":value"))
+                    query.setString("value", searchValue);
+                if (hqlQuery.contains(":locale"))
+                    query.setString("locale", locale);
+
+                query.setFirstResult(start);
+                query.setMaxResults(end - start);
+                List<String> keys = query.list();
+
+                return findMessages(keys);
             }
         });
     }
@@ -95,6 +144,33 @@ public class MessageSourcePersistenceImpl extends PersistenceImpl<MessageSource>
 
                 return null;
 
+            }
+        });
+    }
+
+    @Override
+    public Integer findMessageSourceListCount(final String key, final String value, final String locale) {
+        return getHibernateTemplate().execute(new HibernateCallback<Integer>() {
+            @Override
+            public Integer doInHibernate(Session session) throws HibernateException, SQLException {
+
+                String hqlQuery;
+                if (StringUtils.isBlank(value)) {
+                    hqlQuery = "select distinct(ms.key) from MessageSource ms where ms.key like '" + key + "%'";
+                } else if (StringUtils.isBlank(key)) {
+                    hqlQuery = "select distinct(ms.key) from MessageSource ms where ms.value like '" + value + "%' and ms.locale = '" + locale + "'";
+                } else {
+                    hqlQuery = "select distinct(ms.key) from MessageSource ms where ms.key like '" + key + "%' or (ms.value like '" + value + "%' and ms.locale = '" + locale + "')";
+                }
+
+                Query query = session.createQuery(hqlQuery);
+                List resultList = null;
+                try{
+                    resultList = query.list();
+                } catch (Exception e) {
+                    resultList = new ArrayList();
+                }
+                return resultList.size();
             }
         });
     }

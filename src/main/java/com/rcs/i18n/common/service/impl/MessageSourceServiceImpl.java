@@ -74,9 +74,39 @@ public class MessageSourceServiceImpl implements MessageSourceService {
     }
 
     @Override
+    public String getMSWJson(String key, String value, String locale, int start, int end) {
+        return new StringBuilder()
+                .append("{\"totalRecords\":\"")
+                .append(findMessageSourceListCount(key, value, locale))
+                .append("\",")
+                .append("\"start\":\"")
+                .append(start)
+                .append("\",")
+                .append("\"records\":")
+                .append(getMessageSourceWrappers(key, value, locale, start, end))
+                .append("}")
+                .toString();
+    }
+
+    @Override
     public String getMessageSourceWrappers(int start, int end) {
         try {
             List<MessageSource> messageSourceList = persistence.getMessageSourceList(start, end);
+
+            List<MessageSourceWrapper> messageSourceWrapperList = wrapMessageSources(messageSourceList);
+
+            return getMSWrappersJSON(messageSourceWrapperList);
+        } catch (Exception e) {
+            _logger.error("Cannot get resource cause: " + e.getMessage(), e);
+        }
+        return EMPTY_JSON;
+    }
+
+    @Override
+    public String getMessageSourceWrappers(String key, String value, String locale, int start, int end) {
+
+        try{
+            List<MessageSource> messageSourceList = findMessageSourceList(key, value, locale, start, end);
 
             List<MessageSourceWrapper> messageSourceWrapperList = wrapMessageSources(messageSourceList);
 
@@ -134,6 +164,16 @@ public class MessageSourceServiceImpl implements MessageSourceService {
     @Override
     public Integer getMessageSourcesCount() {
         return persistence.selectMessageSourcesCount();
+    }
+
+    @Override
+    public Integer findMessageSourceListCount(String key, String value, String locale) {
+        return persistence.findMessageSourceListCount(key, value, locale);
+    }
+
+    @Override
+    public List<MessageSource> findMessageSourceList(String key, String value, String locale, int start, int end) {
+        return persistence.findMessageSourceList(key, value, locale, start, end);
     }
 
     @Override

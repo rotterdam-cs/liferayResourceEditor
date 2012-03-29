@@ -1,6 +1,7 @@
 package com.rcs.i18n.common.service;
 
 import com.rcs.i18n.common.message.CustomMessage;
+import com.rcs.i18n.common.model.impl.MessageSource;
 
 import java.util.List;
 import java.util.Locale;
@@ -17,6 +18,8 @@ public interface MessageSourceService {
 
     String getMessageSourceWrappers(int start, int end);
 
+    String getMessageSourceWrappers(String key, String value, String locale, int start, int end);
+
     List<CustomMessage> saveMessageSources(String data, Boolean save);
 
     List<CustomMessage> delete(String data);
@@ -24,4 +27,10 @@ public interface MessageSourceService {
     Integer getMessageSourcesCount();
 
     String getCMJson(List<CustomMessage> customMessages);
+
+    List<MessageSource> findMessageSourceList(String key, String value, String locale, int start, int end);
+
+    Integer findMessageSourceListCount(String key, String value, String locale);
+
+    String getMSWJson(String key, String value, String locale, int start, int end);
 }

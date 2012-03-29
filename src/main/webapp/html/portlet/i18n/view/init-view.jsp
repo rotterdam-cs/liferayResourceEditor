@@ -6,6 +6,8 @@
 
 <portlet:resourceURL var="resourceContentURL" id="resourceContent"/>
 
+<portlet:resourceURL var="searchContentURL" id="searchContent"/>
+
 <portlet:resourceURL var="uploadResourcesURL" id="uploadResources"/>
 
 <portlet:resourceURL var="deleteURL" id="delete"/>

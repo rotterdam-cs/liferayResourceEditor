@@ -2,6 +2,7 @@ package com.rcs.i18n.common.model.impl;
 
 import com.rcs.i18n.common.model.BaseModel;
 import org.hibernate.annotations.Index;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 
@@ -16,6 +17,7 @@ public class MessageSource extends BaseModel {
     @Lob
     @Basic(fetch = FetchType.EAGER)
     @Column(name = "resourceValue", nullable = false)
+    @Type(type = "org.hibernate.type.TextType")
     private String value;
 
     @Column(name = "resouerceLocale", nullable = false)

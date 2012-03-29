@@ -4,7 +4,9 @@
         "http://www.liferay.com/dtd/liferay-hook_6_1_0.dtd">
 
 <hook>
-    <!--<custom-jsp-dir>/hook</custom-jsp-dir>-->
-    <portal-properties>portal.properties</portal-properties>
+    <portal-properties>portal-ext.properties</portal-properties>
+
+    <language-properties>content/Language.properties</language-properties>
+
     <custom-jsp-dir>/hook</custom-jsp-dir>
 </hook>

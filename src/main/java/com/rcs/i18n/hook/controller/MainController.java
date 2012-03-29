@@ -4,6 +4,7 @@ import com.rcs.i18n.common.message.CustomMessage;
 import com.rcs.i18n.common.persistence.MessageSourcePersistence;
 import com.rcs.i18n.common.service.LocaleService;
 import com.rcs.i18n.common.service.MessageSourceService;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -16,6 +17,7 @@ import org.springframework.web.portlet.bind.annotation.ResourceMapping;
 import javax.portlet.PortletRequest;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
+import java.io.IOException;
 import java.util.List;
 
 @Controller
@@ -43,13 +45,23 @@ public class MainController extends BaseController {
 
     @RequestMapping
     public ModelAndView view(PortletRequest portletRequest) {
-        return new ModelAndView("/view/view");
+        ModelAndView mav = new ModelAndView("/view/view");
+        mav.addObject("locales", localeService.getSortedLocales());
+        return mav;
     }
 
     @ResourceMapping("resourceContent")
-    public void resourceContent(@RequestParam("startIndex") Integer startIndex,@RequestParam("pageSize") Integer pageSize,
+    public void resourceContent(@RequestParam("startIndex") Integer startIndex,
+                                @RequestParam("pageSize") Integer pageSize,
+                                @RequestParam(value = "resourcekey", required = false) String resourceKey,
+                                @RequestParam(value = "resourcemessage", required = false) String resourceMessage,
+                                @RequestParam(value = "resourcelocale", required = false) String resourceLocale,
                                 ResourceRequest request, ResourceResponse response) {
-        writeResponse(response, messageSourceService.getMSWJson(startIndex, startIndex + pageSize));
+
+        if (StringUtils.isBlank(resourceKey) && StringUtils.isBlank(resourceMessage))
+            writeResponse(response, messageSourceService.getMSWJson(startIndex, startIndex + pageSize));
+        else
+            writeResponse(response, messageSourceService.getMSWJson(resourceKey, resourceMessage, resourceLocale, startIndex, startIndex + pageSize));
     }
 
     @ResourceMapping("uploadResources")
