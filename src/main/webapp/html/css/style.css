@@ -40,7 +40,8 @@ ul.jPag-pages li a{
     float:left;
     padding:2px 5px;
 }
-span.jPag-current{
+
+ul.jPag-pages li.jPag-current{
     cursor:default;
     font-weight:normal;
     line-height:15px;

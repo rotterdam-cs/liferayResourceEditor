@@ -37,21 +37,36 @@ public class MessageSourcePersistenceImpl extends PersistenceImpl<MessageSource>
 
     @Override
     public MessageSource getMessage(final String key, final String locale) {
-        DetachedCriteria criteria = DetachedCriteria.forClass(MessageSource.class);
-        criteria
-                .add(Restrictions.eq("key", key))
-                .add(Restrictions.eq("locale", locale));
-        List result = getHibernateTemplate().findByCriteria(criteria);
-        return  result.isEmpty() ? null : (MessageSource)result.get(0);
+
+        return getHibernateTemplate().execute(new HibernateCallback<MessageSource>() {
+            @Override
+            public MessageSource doInHibernate(Session session) throws HibernateException, SQLException {
+                String hqlQueryString = "select ms from MessageSource where key=:key and locale=:locale";
+                Query hqlQuery = session.createQuery(hqlQueryString);
+                hqlQuery.setParameter("key", key);
+                hqlQuery.setParameter("locale", locale);
+                List<MessageSource> resultList = hqlQuery.list();
+                if (resultList != null && resultList.size() > 0) {
+                    return resultList.get(0);
+                } else {
+                    return null;
+                }
+            }
+        });
     }
 
     @Override
-    public List<MessageSource> findMessages(Collection keys) {
-        DetachedCriteria criteria = DetachedCriteria.forClass(MessageSource.class);
-        criteria
-                .add(Restrictions.in("key", keys))
-                .addOrder(Order.asc("key"));
-        return (List<MessageSource>)getHibernateTemplate().findByCriteria(criteria);
+    public List<MessageSource> findMessages(final Collection keys) {
+
+        return getHibernateTemplate().execute(new HibernateCallback<List<MessageSource>>() {
+            @Override
+            public List<MessageSource> doInHibernate(Session session) throws HibernateException, SQLException {
+                String hqlQueryString = "select ms from MessageSource ms where key in :keys order by key";
+                Query hqlQuery = session.createQuery(hqlQueryString);
+                hqlQuery.setParameterList("keys", keys);
+                return hqlQuery.list();
+            }
+        });
     }
 
     @Override
@@ -60,13 +75,17 @@ public class MessageSourcePersistenceImpl extends PersistenceImpl<MessageSource>
             @Override
             public List<MessageSource> doInHibernate(Session session) throws HibernateException, SQLException {
 
-                Query sql = session.createSQLQuery
-                        ("select ms.* from (select distinct(resourcekey) resourcekey from messagesource limit :limit offset :offset) qe," +
-                                " messagesource ms where ms.resourcekey = qe.resourcekey order by ms.resourcekey;")
-                        .addEntity("ms", MessageSource.class);
-                sql.setInteger("limit", end - start)
-                    .setInteger("offset", start);
-                return sql.list();
+                String hqlQueryString = "select distinct(m.key) from MessageSource m";
+                Query hqlQuery = session.createQuery(hqlQueryString);
+                hqlQuery.setFirstResult(start);
+                hqlQuery.setMaxResults(end - start);
+                List<String> keys = hqlQuery.list();
+
+                if (keys != null && keys.size() > 0) {
+                    return findMessages(keys);
+                } else {
+                    return new ArrayList<MessageSource>();
+                }
 
             }
         });
@@ -102,7 +121,11 @@ public class MessageSourcePersistenceImpl extends PersistenceImpl<MessageSource>
                 query.setMaxResults(end - start);
                 List<String> keys = query.list();
 
-                return findMessages(keys);
+                if (keys != null && keys.size() > 0) {
+                    return findMessages(keys);
+                } else {
+                    return new ArrayList<MessageSource>();
+                }
             }
         });
     }

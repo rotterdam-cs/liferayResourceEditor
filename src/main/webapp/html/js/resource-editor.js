@@ -111,11 +111,8 @@
                 $('.' + editor.newButtonClass).on('click', editor._editResource);
 
                 var paginatorContainer = Utils._getObjById(Utils._getRealId(editor.configuration.namespace, editor.paginContainerId));
-                paginatorContainer.find("a").each(
-                    function(){
-                        $(this).bind("click", editor._afterPaginClicked);
-                    }
-                );
+
+                paginatorContainer.on("click", "a", editor._afterPaginClicked);
 
                 var searchButton = Utils._getObjById(Utils._getRealId(editor.configuration.namespace, editor.searchButtonId));
 
@@ -143,13 +140,13 @@
             },
 
             //get selected page number and reload content using it
-            _afterPaginClicked:function(){
+            _afterPaginClicked:function(e){
+
+                var element = $(e.target);
 
                 $globalScope._toggleImg(true);
 
-                var $a = $(this);
-
-                var text = $a.text();
+                var text = element.text();
                 var idx = 1;
 
                 if(text === 'First'){
@@ -202,12 +199,6 @@
                     images					: false,
                     mouse					: 'press'
                 });
-                var paginatorContainer = Utils._getObjById(Utils._getRealId($globalScope.configuration.namespace, $globalScope.paginContainerId));
-                paginatorContainer.find("a").each(
-                    function(){
-                        $(this).bind("click", $globalScope._afterPaginClicked);
-                    }
-                );
             },
 
             //go to resource edit page
@@ -263,14 +254,13 @@
                 editor._viewPagination(json.totalRecords, json.start, this.defauldSize);
             },
 
-            _viewContent: function(json) {
+            _viewContent: function(json){
 
                 var editor = $globalScope;
                 var contentBox = Utils._getObjById(Utils._getRealId(editor.configuration.namespace, editor.mswContentId));
+                var contentTable = $('<table/>');
 
-                var html = "<table>";
-
-                $.each(json.records, function(idx, obj) {
+                $.each(json.records, function(idx, obj){
 
                     var inputId = editor.configuration.namespace + '_resource_' + idx;
                     var firstKey = '';
@@ -280,32 +270,69 @@
                         return false;
                     });
 
-                    var innerHtml = "<tr><td>";
-
-                    innerHtml += "<input type=\"text\" value=\"" + obj.key + "\" readonly=\"readonly\" />";
-                    innerHtml += "</td><td>";
-
-                    innerHtml += "<input type=\"text\" class=\"content\" value=\"" + firstKey + "\" id=\"" + inputId + "\" name=\"" + obj.key + "\" />";
-                    innerHtml += "</td><td>";
-
-                    innerHtml += "<select name=\"" + obj.key + "\">";
-
-                    $.each(obj.source, function (sIdx, sourceItm) {
-                        innerHtml += "<option data-key=\"" + obj.key + "\" data-value=\" \" value=\"" + sourceItm + "\">" + sIdx + "</option>";
+                    var tr = $('<tr/>');
+                    var keyInput = $('<input/>',{
+                        type:'text',
+                        value:obj.key,
+                        readonly:''
                     });
 
-                    innerHtml += "</select></td><td>";
+                    var td1 = $('<td/>');
+                    td1.append(keyInput);
+                    tr.append(td1);
 
-                    innerHtml += "<a class=\"delete\" href='\"#\"'><img src='/html/themes/classic/images/common/delete.png' alt='Delete' title='Delete' class='icon' /></a>";
+                    var resourceInput = $('<input/>',{
+                        'class':'content',
+                        id: inputId,
+                        type:'text',
+                        name:obj.key,
+                        value:firstKey
+                    });
 
-                    innerHtml += "</td><td></td></tr>";
+                    var td2 = $('<td/>');
+                    td2.append(resourceInput);
+                    tr.append(td2);
 
-                    html += innerHtml;
+                    var select = $('<select/>', {
+                        name: obj.key
+                    });
+
+                    $.each(obj.source, function (sIdx, sourceItm) {
+                        var option =  $('<option/>',{
+                            'data-key': obj.key,
+                            'data-value': ' ',
+                            value:sourceItm,
+                            text: sIdx
+                        });
+                        select.append(option);
+                    });
+
+                    var td3 = $('<td/>');
+                    td3.append(select);
+                    tr.append(td3);
+
+                    var delButton = $('<a/>', {
+                        'class': 'delete',
+                        'href': '#'
+                    });
+
+                    var img = $('<img/>',{
+                        title: 'Delete',
+                        alt: 'Delete',
+                        src: '/html/themes/classic/images/common/delete.png',
+                        'class': 'icon'
+                    });
+
+                    delButton.append(img);
+
+                    var td4 = $('<td/>');
+                    td4.append(delButton);
+                    tr.append(td4);
+
+                    contentTable.append(tr);
                 });
 
-                html += "</table>";
-
-                contentBox.empty().append($(html));
+                contentBox.empty().append(contentTable);
                 editor._toggleImg(false);
                 editor._toggleSaveButton(false);
             },

@@ -64,7 +64,7 @@
 		for(var i = 0; i < o.count; i++){
 			var val = i+1;
 			if(val == selectedpage){
-				var _obj = $(document.createElement('li')).html('<span class="jPag-current">'+val+'</span>');
+				var _obj = $(document.createElement('li')).html('<a class="jPag-current">'+val+'</a>');
 				selobj = _obj;
 				_ul.append(_obj);
 			}	
@@ -200,10 +200,16 @@
 		
 		//click a page
 		_ulwrapdiv.find('li').click(function(e){
-			selobj.html('<a>'+selobj.find('.jPag-current').html()+'</a>'); 
-			var currval = $(this).find('a').html();
-			$(this).html('<span class="jPag-current">'+currval+'</span>');
-			selobj = $(this);
+
+            var prevLink = selobj.find("a").removeClass("jPag-current");
+            var prevLinkHtml = prevLink.html();
+            prevLink.html(prevLinkHtml);
+
+            var currentLink = $(this).find("a");
+            currentLink.addClass("jPag-current");
+            var currval = currentLink.html();
+
+            selobj = $(this);
 			$.fn.applystyle(o,$(this).parent().parent().parent(),a_css,hover_css,_first,_ul,_ulwrapdiv,_divwrapright);	
 			var left = (this.offsetLeft) / 2;
 			var left2 = _ulwrapdiv.scrollLeft() + left;
@@ -212,7 +218,7 @@
 				_ulwrapdiv.animate({scrollLeft: left + tmp - _first.parent().width() + 52 + 'px'});	
 			else
 				_ulwrapdiv.animate({scrollLeft: left + tmp - _first.parent().width() + 'px'});	
-			o.onChange(currval);	
+			o.onChange(currval);
 		});
 		
 		var last = _ulwrapdiv.find('li').eq(o.start-1);
@@ -225,14 +231,24 @@
 	}
 	
 	$.fn.applystyle = function(o,obj,a_css,hover_css,_first,_ul,_ulwrapdiv,_divwrapright){
+
+                    var currentLinkCss = {
+                        'background-color': "white",
+                        'color': "gray",
+                        'border': "1px solid gray"
+                    };
+
 					obj.find('a').css(a_css);
-					obj.find('span.jPag-current').css(hover_css);
+					obj.find('a.jPag-current').css(currentLinkCss);
 					obj.find('a').hover(
 					function(){
 						$(this).css(hover_css);
 					},
 					function(){
 						$(this).css(a_css);
+                        if ($(this).hasClass("jPag-current")) {
+                            $(this).css(currentLinkCss);
+                        }
 					}
 					);
 					obj.css('padding-left',_first.parent().width() + 5 +'px');
