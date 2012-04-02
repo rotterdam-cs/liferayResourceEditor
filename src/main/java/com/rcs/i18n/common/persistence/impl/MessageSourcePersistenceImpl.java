@@ -41,7 +41,7 @@ public class MessageSourcePersistenceImpl extends PersistenceImpl<MessageSource>
         return getHibernateTemplate().execute(new HibernateCallback<MessageSource>() {
             @Override
             public MessageSource doInHibernate(Session session) throws HibernateException, SQLException {
-                String hqlQueryString = "select ms from MessageSource where key=:key and locale=:locale";
+                String hqlQueryString = "select ms from MessageSource ms where key=:key and locale=:locale";
                 Query hqlQuery = session.createQuery(hqlQueryString);
                 hqlQuery.setParameter("key", key);
                 hqlQuery.setParameter("locale", locale);
