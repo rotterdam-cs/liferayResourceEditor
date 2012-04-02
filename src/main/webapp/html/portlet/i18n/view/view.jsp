@@ -9,7 +9,7 @@
                         <liferay-ui:message key="resource-editor.on-key" />
                     </div>
                     <div class="center">
-                        <input id="${namespace}onKeyInput" />
+                        <input type="text" id="${namespace}onKeyInput" />
                     </div>
                     <div class="right"></div>
                 </div>
@@ -18,7 +18,7 @@
                         <liferay-ui:message key="resource-editor.on-message" />
                     </div>
                     <div class="center">
-                        <input id="${namespace}onMessageInput" />
+                        <input type="text" id="${namespace}onMessageInput" />
                     </div>
                     <div class="right">
                         <select id="${namespace}onMessageSelect">
@@ -35,11 +35,6 @@
                     <div class="center">
                         <select id="${namespace}inBundleSelect">
                             <option value="all_bundles"><liferay-ui:message key="resource-editor.all-bundles" /></option>
-                            <%--
-                            <c:forEach var="locale" items="${locales}">
-                                <option value="${locale}">${locale}</option>
-                            </c:forEach>
-                            --%>
                         </select>
                     </div>
                     <div class="right">

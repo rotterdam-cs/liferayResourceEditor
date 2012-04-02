@@ -53,6 +53,7 @@
         this.defauldSize = 10;
 
         this.searchButtonId  = "searchButton";
+        this.searchFormId  = "filterTranslationsForm";
         this.onKeyInput      = "onKeyInput";
         this.onMessageInput  = "onMessageInput";
         this.onMessageSelect = "onMessageSelect";
@@ -117,8 +118,24 @@
                 var searchButton = Utils._getObjById(Utils._getRealId(editor.configuration.namespace, editor.searchButtonId));
 
                 searchButton.on("click", editor._searchTranslations);
+
+                var searchForm = Utils._getObjById(Utils._getRealId(editor.configuration.namespace, editor.searchFormId));
+
+                searchForm.delegate("input[type=text]", "keypress", editor._searchKeyPressHandler);
             },
 
+            _searchKeyPressHandler: function(event) {
+
+                // if enter was pressed
+                if (event.keyCode == 13) {
+
+                    var editor = $globalScope;
+
+                    var searchButton = Utils._getObjById(Utils._getRealId(editor.configuration.namespace, editor.searchButtonId));
+
+                    searchButton.trigger("click");
+                }
+            },
 
             _searchTranslations: function() {
 
@@ -183,7 +200,7 @@
 
             //init pagination
             _viewPagination:function(count, start, pageSize){
-                var pageCount = count/pageSize;
+                var pageCount = Math.ceil(count/pageSize);
                 var startPage = start/pageSize + 1;
                 Utils._getObjById(Utils._getRealId($globalScope.configuration.namespace, $globalScope.paginatorId)).paginate({
                     count 		: pageCount,

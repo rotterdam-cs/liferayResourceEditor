@@ -25,10 +25,13 @@ public class MessageSourcePersistenceImpl extends PersistenceImpl<MessageSource>
         return getHibernateTemplate().execute(new HibernateCallback<Boolean>() {
             @Override
             public Boolean doInHibernate(Session session) throws HibernateException, SQLException {
-                Query query = session.createQuery("select count(ms) from MessageSource ms where ms.key = :key and ms.locale = :locale");
+
+                String localeCountry = locale.substring(0,2) + "%";
+
+                Query query = session.createQuery("select count(ms) from MessageSource ms where ms.key = :key and ms.locale like :locale");
 
                 query.setParameter("key", key);
-                query.setParameter("locale", locale);
+                query.setParameter("locale", localeCountry);
 
                 return ((Number) query.uniqueResult()).intValue() > 0;
             }
@@ -41,10 +44,11 @@ public class MessageSourcePersistenceImpl extends PersistenceImpl<MessageSource>
         return getHibernateTemplate().execute(new HibernateCallback<MessageSource>() {
             @Override
             public MessageSource doInHibernate(Session session) throws HibernateException, SQLException {
-                String hqlQueryString = "select ms from MessageSource ms where key=:key and locale=:locale";
+                String localeCountry = locale.substring(0,2) + "%";
+                String hqlQueryString = "select ms from MessageSource ms where ms.key=:key and ms.locale like :locale";
                 Query hqlQuery = session.createQuery(hqlQueryString);
                 hqlQuery.setParameter("key", key);
-                hqlQuery.setParameter("locale", locale);
+                hqlQuery.setParameter("locale", localeCountry);
                 List<MessageSource> resultList = hqlQuery.list();
                 if (resultList != null && resultList.size() > 0) {
                     return resultList.get(0);
@@ -74,7 +78,6 @@ public class MessageSourcePersistenceImpl extends PersistenceImpl<MessageSource>
         return getHibernateTemplate().execute(new HibernateCallback<List<MessageSource>>() {
             @Override
             public List<MessageSource> doInHibernate(Session session) throws HibernateException, SQLException {
-
                 String hqlQueryString = "select distinct(m.key) from MessageSource m";
                 Query hqlQuery = session.createQuery(hqlQueryString);
                 hqlQuery.setFirstResult(start);
@@ -97,15 +100,17 @@ public class MessageSourcePersistenceImpl extends PersistenceImpl<MessageSource>
             @Override
             public List<MessageSource> doInHibernate(Session session) throws HibernateException, SQLException {
 
-                String searchKey = key + "%";
-                String searchValue = value + "%";
+                String searchKey = "%" + key.toLowerCase() + "%";
+                String searchValue = "%" + value.toLowerCase() + "%";
+                String localeCountry = locale.substring(0,2) + "%";
+
                 String hqlQuery = "select distinct(m.key) from MessageSource m where ";
                 if (StringUtils.isBlank(value)) {
-                    hqlQuery += "m.key like :key";
+                    hqlQuery += "lower(m.key) like :key";
                 } else if (StringUtils.isBlank(key)) {
-                    hqlQuery += "m.value like :value and m.locale = :locale";
+                    hqlQuery += "lower(m.value) like :value and m.locale like :locale";
                 } else {
-                    hqlQuery += "m.key like :key or (m.value like :value and m.locale = :locale)";
+                    hqlQuery += "lower(m.key) like :key or (lower(m.value) like :value and m.locale like :locale)";
                 }
                 hqlQuery += " order by m.key";
 
@@ -115,7 +120,7 @@ public class MessageSourcePersistenceImpl extends PersistenceImpl<MessageSource>
                 if (hqlQuery.contains(":value"))
                     query.setString("value", searchValue);
                 if (hqlQuery.contains(":locale"))
-                    query.setString("locale", locale);
+                    query.setString("locale", localeCountry);
 
                 query.setFirstResult(start);
                 query.setMaxResults(end - start);
@@ -177,16 +182,26 @@ public class MessageSourcePersistenceImpl extends PersistenceImpl<MessageSource>
             @Override
             public Integer doInHibernate(Session session) throws HibernateException, SQLException {
 
-                String hqlQuery;
-                if (StringUtils.isBlank(value)) {
-                    hqlQuery = "select distinct(ms.key) from MessageSource ms where ms.key like '" + key + "%'";
-                } else if (StringUtils.isBlank(key)) {
-                    hqlQuery = "select distinct(ms.key) from MessageSource ms where ms.value like '" + value + "%' and ms.locale = '" + locale + "'";
-                } else {
-                    hqlQuery = "select distinct(ms.key) from MessageSource ms where ms.key like '" + key + "%' or (ms.value like '" + value + "%' and ms.locale = '" + locale + "')";
-                }
+                String searchKey = "%" + key.toLowerCase() + "%";
+                String searchValue = "%" + value.toLowerCase() + "%";
+                String localeCountry = locale.substring(0,2) + "%";
 
+                String hqlQuery = "select distinct(ms.key) from MessageSource ms where ";
+                if (StringUtils.isBlank(value)) {
+                    hqlQuery += "lower(ms.key) like :key";
+                } else if (StringUtils.isBlank(key)) {
+                    hqlQuery += "lower(ms.value) like :value and ms.locale like :locale";
+                } else {
+                    hqlQuery += "lower(ms.key) like :key or (lower(ms.value) like :value and ms.locale like :locale)";
+                }
                 Query query = session.createQuery(hqlQuery);
+                if (hqlQuery.contains(":key"))
+                    query.setString("key", searchKey);
+                if (hqlQuery.contains(":value"))
+                    query.setString("value", searchValue);
+                if (hqlQuery.contains(":locale"))
+                    query.setString("locale", localeCountry);
+
                 List resultList = null;
                 try{
                     resultList = query.list();
