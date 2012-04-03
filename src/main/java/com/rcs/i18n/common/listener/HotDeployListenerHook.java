@@ -29,9 +29,9 @@ public class HotDeployListenerHook implements HotDeployListener {
 
     private static final Logger _logger = Logger.getLogger(HotDeployListenerHook.class);
 
-    public static final String DEFAULT_RESOURCE_NAME = "content/Language.properties";
+    public static final String DEFAULT_RESOURCE_NAME = "Language.properties";
 
-    public static final String DEFAULT_RESOURCE_PREFIX = "content/Language_";
+    public static final String DEFAULT_RESOURCE_PREFIX = "Language_";
     public static final String DEFAULT_RESOURCE_SUFFIX = ".properties";
 
     private static LocaleService localeService = ObjectFactory.getBean(LocaleService.class);
@@ -51,6 +51,9 @@ public class HotDeployListenerHook implements HotDeployListener {
 
         ClassLoader contextClassLoader = hotDeployEvent.getContextClassLoader();
 
+        // determines whether <resource-bundle> specified in 'portlet.xml'
+        boolean resourceBundleSpecified = false;
+
         String portletXML = StringUtils.EMPTY;
         try {
             portletXML = HttpUtil.URLtoString(servletContext.getResource("/WEB-INF/" + Portal.PORTLET_XML_FILE_NAME_STANDARD));
@@ -60,55 +63,50 @@ public class HotDeployListenerHook implements HotDeployListener {
 
         if (StringUtils.isNotBlank(portletXML)) {
 
+            /*== try to read resource bundle from portlet.xml ===*/
+
             try {
-                readPortletXML(portletXML, contextClassLoader);
+                resourceBundleSpecified = readPortletXML(portletXML, contextClassLoader);
             } catch (DocumentException e) {
                 if (_logger.isDebugEnabled()) {
                     _logger.debug("Unable to read process xml. ");
                 }
             }
-
         }
-    }
 
-    /*
-    *  Reads 'resource-bundle' property from portlet.xml
-    * */
-    private void readPortletXML(String xml, ClassLoader classLoader) throws DocumentException {
+        // if <resource-bundle> not specified - use default
+        if (!resourceBundleSpecified) {
 
-        Document document = SAXReaderUtil.read(xml, true);
+            String defaultResourceName = DEFAULT_RESOURCE_NAME;
 
-        Element rootElement = document.getRootElement();
-
-        Locale[] availableLocales = localeService.getAvailableLocales();
-
-        for (Element portletElement : rootElement.elements("portlet")) {
-
-            String resourceBundleName = portletElement.elementText("resource-bundle");
-
-            String defaultResourceName = resourceBundleName + DEFAULT_RESOURCE_SUFFIX;
-
-            URL defaultResource = classLoader.getResource(defaultResourceName);
+            URL defaultResource = contextClassLoader.getResource(defaultResourceName);
 
             if (defaultResource != null) {
 
-                Properties bundle = new Properties();
+                Properties defaultBundle = new Properties();
                 try {
                     InputStream inStream = defaultResource.openStream();
-                    bundle.load(inStream);
+                    defaultBundle.load(inStream);
                     inStream.close();
                 } catch (IOException e) {
                     _logger.warn("Could not read file", e);
                 }
 
-                processBundle(Locale.getDefault(), bundle);
+                processBundle(Locale.getDefault(), defaultBundle);
             }
+
+            Locale[] availableLocales = localeService.getAvailableLocales();
 
             for (Locale locale : availableLocales) {
 
-                String resourceName = resourceBundleName + StringPool.UNDERLINE + locale.getLanguage() + DEFAULT_RESOURCE_SUFFIX;
+                String resourceName = DEFAULT_RESOURCE_PREFIX + locale.getLanguage() + DEFAULT_RESOURCE_SUFFIX;
 
-                URL resource = classLoader.getResource(resourceName);
+                URL resource = contextClassLoader.getResource(resourceName);
+
+                if (resource == null) {
+                    resourceName = DEFAULT_RESOURCE_PREFIX + locale.toString() + DEFAULT_RESOURCE_SUFFIX;
+                    resource = contextClassLoader.getResource(resourceName);
+                }
 
                 if (resource != null) {
 
@@ -129,7 +127,79 @@ public class HotDeployListenerHook implements HotDeployListener {
     }
 
     /*
-    *   Processed resource bundle for specified locale
+    *  Reads 'resource-bundle' property from portlet.xml
+    * */
+    private boolean readPortletXML(String xml, ClassLoader classLoader) throws DocumentException {
+
+        boolean resourceBundleSpecified = false;
+
+        Document document = SAXReaderUtil.read(xml, true);
+
+        Element rootElement = document.getRootElement();
+
+        Locale[] availableLocales = localeService.getAvailableLocales();
+
+        for (Element portletElement : rootElement.elements("portlet")) {
+
+            String resourceBundleName = portletElement.elementText("resource-bundle");
+
+            if (resourceBundleName != null) {
+
+                resourceBundleSpecified = true;
+
+                String defaultResourceName = resourceBundleName + DEFAULT_RESOURCE_SUFFIX;
+
+                URL defaultResource = classLoader.getResource(defaultResourceName);
+
+                if (defaultResource != null) {
+
+                    Properties bundle = new Properties();
+                    try {
+                        InputStream inStream = defaultResource.openStream();
+                        bundle.load(inStream);
+                        inStream.close();
+                    } catch (IOException e) {
+                        _logger.warn("Could not read file", e);
+                    }
+
+                    processBundle(Locale.getDefault(), bundle);
+                }
+
+                for (Locale locale : availableLocales) {
+
+                    String resourceName = resourceBundleName + StringPool.UNDERLINE + locale.getLanguage() + DEFAULT_RESOURCE_SUFFIX;
+
+                    URL resource = classLoader.getResource(resourceName);
+
+                    if (resource == null) {
+                        resourceName = resourceBundleName + StringPool.UNDERLINE + locale.toString() + DEFAULT_RESOURCE_SUFFIX;
+                        resource = classLoader.getResource(resourceName);
+                    }
+
+                    if (resource != null) {
+
+                        Properties bundle = new Properties();
+                        try {
+                            InputStream inStream = resource.openStream();
+                            bundle.load(inStream);
+                            inStream.close();
+                        } catch (IOException e) {
+                            _logger.warn("Could not read file", e);
+                            continue;
+                        }
+
+                        processBundle(locale, bundle);
+                    }
+                }
+
+            }
+        }
+
+        return resourceBundleSpecified;
+    }
+
+    /*
+    *   Processes resource bundle for specified locale
     * */
     private void  processBundle(Locale locale, Properties bundle) {
 
