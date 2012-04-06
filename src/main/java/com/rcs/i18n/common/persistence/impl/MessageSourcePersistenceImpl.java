@@ -2,6 +2,7 @@ package com.rcs.i18n.common.persistence.impl;
 
 import com.rcs.i18n.common.model.impl.MessageSource;
 import com.rcs.i18n.common.persistence.MessageSourcePersistence;
+import com.rcs.i18n.common.utils.RcsConstants;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
@@ -65,7 +66,7 @@ public class MessageSourcePersistenceImpl extends PersistenceImpl<MessageSource>
         return getHibernateTemplate().execute(new HibernateCallback<List<MessageSource>>() {
             @Override
             public List<MessageSource> doInHibernate(Session session) throws HibernateException, SQLException {
-                String hqlQueryString = "select ms from MessageSource ms where key in :keys order by key";
+                String hqlQueryString = "select ms from MessageSource ms where ms.key in :keys order by ms.key";
                 Query hqlQuery = session.createQuery(hqlQueryString);
                 hqlQuery.setParameterList("keys", keys);
                 return hqlQuery.list();
@@ -78,7 +79,7 @@ public class MessageSourcePersistenceImpl extends PersistenceImpl<MessageSource>
         return getHibernateTemplate().execute(new HibernateCallback<List<MessageSource>>() {
             @Override
             public List<MessageSource> doInHibernate(Session session) throws HibernateException, SQLException {
-                String hqlQueryString = "select distinct(m.key) from MessageSource m";
+                String hqlQueryString = "select distinct m.key from MessageSource m";
                 Query hqlQuery = session.createQuery(hqlQueryString);
                 hqlQuery.setFirstResult(start);
                 hqlQuery.setMaxResults(end - start);
@@ -95,32 +96,54 @@ public class MessageSourcePersistenceImpl extends PersistenceImpl<MessageSource>
     }
 
     @Override
-    public List<MessageSource> findMessageSourceList(final String key, final String value, final String locale, final int start, final int end) {
+    public List<MessageSource> findMessageSourceList(final String key, final String value, final String locale,
+                                                     final String bundle, final int start, final int end) {
+
         return getHibernateTemplate().execute(new HibernateCallback<List<MessageSource>>() {
             @Override
             public List<MessageSource> doInHibernate(Session session) throws HibernateException, SQLException {
 
-                String searchKey = "%" + key.toLowerCase() + "%";
-                String searchValue = "%" + value.toLowerCase() + "%";
-                String localeCountry = locale.substring(0,2) + "%";
+                boolean searchInAllBundles = RcsConstants.ALL_BUNDLES.equals(bundle);
 
-                String hqlQuery = "select distinct(m.key) from MessageSource m where ";
-                if (StringUtils.isBlank(value)) {
-                    hqlQuery += "lower(m.key) like :key";
-                } else if (StringUtils.isBlank(key)) {
-                    hqlQuery += "lower(m.value) like :value and m.locale like :locale";
-                } else {
-                    hqlQuery += "lower(m.key) like :key or (lower(m.value) like :value and m.locale like :locale)";
+                String hqlQuery = "select distinct m.key from MessageSource m where ";
+
+                boolean keyNotBlank = StringUtils.isNotBlank(key);
+                boolean valueNotBlank = StringUtils.isNotBlank(value);
+
+
+                if (keyNotBlank) {
+                    hqlQuery += " lower(m.key) like :key ";
                 }
+                if (valueNotBlank) {
+                    if (keyNotBlank) {
+                        hqlQuery += " or ";
+                    }
+                    hqlQuery += " (lower(m.value) like :value and m.locale = :locale) ";
+                }
+                if (!searchInAllBundles) {
+
+                    if (keyNotBlank || valueNotBlank) {
+                        hqlQuery += " and ";
+                    }
+
+                    hqlQuery += " m.bundle = :bundle";
+                }
+
                 hqlQuery += " order by m.key";
 
                 Query query = session.createQuery(hqlQuery);
-                if (hqlQuery.contains(":key"))
-                    query.setString("key", searchKey);
-                if (hqlQuery.contains(":value"))
-                    query.setString("value", searchValue);
-                if (hqlQuery.contains(":locale"))
-                    query.setString("locale", localeCountry);
+
+                if (hqlQuery.contains(":key")) {
+                    query.setString("key", "%" + key.toLowerCase() + "%");
+                }
+                if (hqlQuery.contains(":value")) {
+                    query.setString("value", "%" + value.toLowerCase() + "%");
+                    query.setString("locale", locale);
+                }
+
+                if (!searchInAllBundles) {
+                    query.setString("bundle", bundle);
+                }
 
                 query.setFirstResult(start);
                 query.setMaxResults(end - start);
@@ -177,30 +200,52 @@ public class MessageSourcePersistenceImpl extends PersistenceImpl<MessageSource>
     }
 
     @Override
-    public Integer findMessageSourceListCount(final String key, final String value, final String locale) {
+    public Integer findMessageSourceListCount(final String key, final String value, final String locale, final String bundle) {
         return getHibernateTemplate().execute(new HibernateCallback<Integer>() {
             @Override
             public Integer doInHibernate(Session session) throws HibernateException, SQLException {
 
-                String searchKey = "%" + key.toLowerCase() + "%";
-                String searchValue = "%" + value.toLowerCase() + "%";
-                String localeCountry = locale.substring(0,2) + "%";
+                boolean searchInAllBundles = RcsConstants.ALL_BUNDLES.equals(bundle);
 
-                String hqlQuery = "select distinct(ms.key) from MessageSource ms where ";
-                if (StringUtils.isBlank(value)) {
-                    hqlQuery += "lower(ms.key) like :key";
-                } else if (StringUtils.isBlank(key)) {
-                    hqlQuery += "lower(ms.value) like :value and ms.locale like :locale";
-                } else {
-                    hqlQuery += "lower(ms.key) like :key or (lower(ms.value) like :value and ms.locale like :locale)";
+                String hqlQuery = "select distinct m.key from MessageSource m where ";
+
+                boolean keyNotBlank = StringUtils.isNotBlank(key);
+                boolean valueNotBlank = StringUtils.isNotBlank(value);
+
+
+                if (keyNotBlank) {
+                    hqlQuery += " lower(m.key) like :key ";
                 }
+                if (valueNotBlank) {
+                    if (keyNotBlank) {
+                        hqlQuery += " or ";
+                    }
+                    hqlQuery += " (lower(m.value) like :value and m.locale = :locale) ";
+                }
+                if (!searchInAllBundles) {
+
+                    if (keyNotBlank || valueNotBlank) {
+                        hqlQuery += " and ";
+                    }
+
+                    hqlQuery += " m.bundle = :bundle";
+                }
+
+                hqlQuery += " order by m.key";
+
                 Query query = session.createQuery(hqlQuery);
-                if (hqlQuery.contains(":key"))
-                    query.setString("key", searchKey);
-                if (hqlQuery.contains(":value"))
-                    query.setString("value", searchValue);
-                if (hqlQuery.contains(":locale"))
-                    query.setString("locale", localeCountry);
+
+                if (hqlQuery.contains(":key")) {
+                    query.setString("key", "%" + key.toLowerCase() + "%");
+                }
+                if (hqlQuery.contains(":value")) {
+                    query.setString("value", "%" + value.toLowerCase() + "%");
+                    query.setString("locale", locale);
+                }
+
+                if (!searchInAllBundles) {
+                    query.setString("bundle", bundle);
+                }
 
                 List resultList = null;
                 try{
@@ -220,6 +265,21 @@ public class MessageSourcePersistenceImpl extends PersistenceImpl<MessageSource>
             public Integer doInHibernate(Session session) throws HibernateException, SQLException {
                 Query hql = session.createQuery("select count(distinct ms.key) from MessageSource ms");
                 return ((Long)hql.uniqueResult()).intValue();
+            }
+        });
+    }
+
+    @Override
+    public List<String> getMessageBundles() {
+        return getHibernateTemplate().execute(new HibernateCallback<List<String>>() {
+            @Override
+            public List<String> doInHibernate(Session session) throws HibernateException, SQLException {
+                Query query = session.createQuery("select distinct ms.bundle from MessageSource ms");
+                List<String> bundles = query.list();
+                if (bundles != null && bundles.size() > 0) {
+                    return bundles;
+                }
+                return new ArrayList<String>();
             }
         });
     }

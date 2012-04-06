@@ -55,6 +55,8 @@ public class HotDeployListenerHook implements HotDeployListener {
 
         ClassLoader contextClassLoader = hotDeployEvent.getContextClassLoader();
 
+        String bundleName = hotDeployEvent.getPluginPackage().getName();
+
         // determines whether <resource-bundle> specified in 'portlet.xml' or <language-properties> specified in 'liferay-hook.xml'
         boolean resourceBundleSpecified = false;
 
@@ -69,7 +71,7 @@ public class HotDeployListenerHook implements HotDeployListener {
 
             /*== try to read resource bundle from portlet.xml ===*/
             try {
-                resourceBundleSpecified = readPortletXML(portletXML, contextClassLoader);
+                resourceBundleSpecified = readPortletXML(portletXML, contextClassLoader, bundleName);
             } catch (DocumentException e) {
                 if (_logger.isDebugEnabled()) {
                     _logger.debug("Unable to read process xml. ");
@@ -91,7 +93,7 @@ public class HotDeployListenerHook implements HotDeployListener {
 
                 /*== try to read resource bundle from liferay-hook.xml ===*/
                 try {
-                    resourceBundleSpecified = readLiferayHookXML(liferayHookXml, contextClassLoader);
+                    resourceBundleSpecified = readLiferayHookXML(liferayHookXml, contextClassLoader, bundleName);
                 } catch (DocumentException e) {
                     if (_logger.isDebugEnabled()) {
                         _logger.debug("Unable to read process xml. ");
@@ -104,14 +106,14 @@ public class HotDeployListenerHook implements HotDeployListener {
 
         // if <resource-bundle> not specified - use default
         if (!resourceBundleSpecified) {
-            processBundle(DEFAULT_RESOURCE_NAME, contextClassLoader);
+            processBundle(DEFAULT_RESOURCE_NAME, contextClassLoader, bundleName);
         }
     }
 
     /*
    *  Reads 'resource-bundle' property from liferay-hook.xml
    * */
-    private boolean readLiferayHookXML(String xml, ClassLoader classLoader) throws DocumentException {
+    private boolean readLiferayHookXML(String xml, ClassLoader classLoader, String bundleName) throws DocumentException {
 
         boolean resourceBundleSpecified = false;
 
@@ -127,7 +129,7 @@ public class HotDeployListenerHook implements HotDeployListener {
 
                 resourceBundleSpecified = true;
 
-                processBundle(resourceBundleName, classLoader);
+                processBundle(resourceBundleName, classLoader, bundleName);
             }
 
         }
@@ -138,7 +140,7 @@ public class HotDeployListenerHook implements HotDeployListener {
     /*
     *  Reads 'resource-bundle' property from portlet.xml
     * */
-    private boolean readPortletXML(String xml, ClassLoader classLoader) throws DocumentException {
+    private boolean readPortletXML(String xml, ClassLoader classLoader, String bundleName) throws DocumentException {
 
         boolean resourceBundleSpecified = false;
 
@@ -154,7 +156,7 @@ public class HotDeployListenerHook implements HotDeployListener {
 
                 resourceBundleSpecified = true;
 
-                processBundle(resourceBundleName, classLoader);
+                processBundle(resourceBundleName, classLoader, bundleName);
             }
         }
 
@@ -165,7 +167,7 @@ public class HotDeployListenerHook implements HotDeployListener {
     /*
     *   Processes resource bundle for specified locale
     * */
-    private void processBundle(String resourceBundleName, ClassLoader classLoader) {
+    private void processBundle(String resourceBundleName, ClassLoader classLoader, String bundleName) {
 
         String baseResourceName = resourceBundleName;
 
@@ -185,7 +187,7 @@ public class HotDeployListenerHook implements HotDeployListener {
                 _logger.warn("Could not read file", e);
             }
 
-            processBundle(Locale.getDefault(), bundle);
+            processBundle(Locale.getDefault(), bundle, bundleName);
         }
 
         for (Locale locale : availableLocales) {
@@ -211,7 +213,7 @@ public class HotDeployListenerHook implements HotDeployListener {
                     continue;
                 }
 
-                processBundle(locale, bundle);
+                processBundle(locale, bundle, bundleName);
             }
         }
     }
@@ -219,7 +221,7 @@ public class HotDeployListenerHook implements HotDeployListener {
     /*
     *   Processes resource bundle for specified locale
     * */
-    private void  processBundle(Locale locale, Properties bundle) {
+    private void  processBundle(Locale locale, Properties bundle, String bundleName) {
 
         for (Map.Entry property : bundle.entrySet()) {
 
@@ -233,6 +235,7 @@ public class HotDeployListenerHook implements HotDeployListener {
                 messageSource.setKey(key);
                 messageSource.setValue(value);
                 messageSource.setLocale(locale.toString());
+                messageSource.setBundle(bundleName);
 
                 ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
                 try {

@@ -23,6 +23,9 @@ public class MessageSource extends BaseModel {
     @Column(name = "resouerceLocale", nullable = false)
     private String locale;
 
+    @Column(name = "resouerceBundle", nullable = true)
+    private String bundle;
+
     public String getKey() {
         return key;
     }
@@ -45,5 +48,13 @@ public class MessageSource extends BaseModel {
 
     public void setLocale(String locale) {
         this.locale = locale;
+    }
+
+    public String getBundle() {
+        return bundle;
+    }
+
+    public void setBundle(String bundle) {
+        this.bundle = bundle;
     }
 }

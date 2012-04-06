@@ -4,6 +4,7 @@ import com.rcs.i18n.common.message.CustomMessage;
 import com.rcs.i18n.common.persistence.MessageSourcePersistence;
 import com.rcs.i18n.common.service.LocaleService;
 import com.rcs.i18n.common.service.MessageSourceService;
+import com.rcs.i18n.common.utils.RcsConstants;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +48,7 @@ public class MainController extends BaseController {
     public ModelAndView view(PortletRequest portletRequest) {
         ModelAndView mav = new ModelAndView("/view/view");
         mav.addObject("locales", localeService.getSortedLocales());
+        mav.addObject("bundles", messageSourcePersistence.getMessageBundles());
         return mav;
     }
 
@@ -56,12 +58,17 @@ public class MainController extends BaseController {
                                 @RequestParam(value = "resourcekey", required = false) String resourceKey,
                                 @RequestParam(value = "resourcemessage", required = false) String resourceMessage,
                                 @RequestParam(value = "resourcelocale", required = false) String resourceLocale,
+                                @RequestParam(value = "resourcebundle", required = false) String resourceBundle,
                                 ResourceRequest request, ResourceResponse response) {
 
-        if (StringUtils.isBlank(resourceKey) && StringUtils.isBlank(resourceMessage))
+
+        boolean findAll = StringUtils.isBlank(resourceKey) && StringUtils.isBlank(resourceMessage) &&
+                (resourceBundle == null || RcsConstants.ALL_BUNDLES.equals(resourceBundle));
+
+        if (findAll)
             writeResponse(response, messageSourceService.getMSWJson(startIndex, startIndex + pageSize));
         else
-            writeResponse(response, messageSourceService.getMSWJson(resourceKey, resourceMessage, resourceLocale, startIndex, startIndex + pageSize));
+            writeResponse(response, messageSourceService.getMSWJson(resourceKey, resourceMessage, resourceLocale, resourceBundle, startIndex, startIndex + pageSize));
     }
 
     @ResourceMapping("uploadResources")

@@ -6,6 +6,7 @@ import com.rcs.i18n.common.model.impl.MessageSource;
 import com.rcs.i18n.common.persistence.MessageSourcePersistence;
 import com.rcs.i18n.common.service.LocaleService;
 import com.rcs.i18n.common.service.ObjectFactory;
+import com.rcs.i18n.common.utils.RcsConstants;
 import com.rcs.i18n.hook.util.PortalLanguageResourcesUtil;
 import com.liferay.portal.kernel.events.ActionException;
 import com.liferay.portal.kernel.events.SimpleAction;
@@ -68,7 +69,7 @@ public class LanguageStartupProcessor extends SimpleAction {
                     messageSource.setKey(message.getKey());
                     messageSource.setValue(message.getValue());
                     messageSource.setLocale(locale.toString());
-
+                    messageSource.setBundle(RcsConstants.DEFAULT_BUNDLE_NAME);
                     messageSourcePersistence.insert(messageSource);
                 }
 

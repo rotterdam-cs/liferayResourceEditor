@@ -15,13 +15,15 @@ public interface MessageSourcePersistence extends Persistence<MessageSource>{
 
     List<MessageSource> getMessageSourceList(int start, int end);
 
-    List<MessageSource> findMessageSourceList(String key, String message, String locale, int start, int end);
+    List<MessageSource> findMessageSourceList(String key, String message, String locale, String bundle, int start, int end);
 
-    Integer findMessageSourceListCount(String key, String message, String locale);
+    Integer findMessageSourceListCount(String key, String message, String locale, String bundle);
 
     void updateThroughHQL(MessageSource messageSource);
 
     void deleteThroughHQL(String key);
 
     Integer selectMessageSourcesCount();
+
+    List<String> getMessageBundles();
 }

@@ -18,7 +18,7 @@ public interface MessageSourceService {
 
     String getMessageSourceWrappers(int start, int end);
 
-    String getMessageSourceWrappers(String key, String value, String locale, int start, int end);
+    String getMessageSourceWrappers(String key, String value, String locale, String bundle, int start, int end);
 
     List<CustomMessage> saveMessageSources(String data, Boolean save);
 
@@ -28,9 +28,9 @@ public interface MessageSourceService {
 
     String getCMJson(List<CustomMessage> customMessages);
 
-    List<MessageSource> findMessageSourceList(String key, String value, String locale, int start, int end);
+    List<MessageSource> findMessageSourceList(String key, String value, String locale, String bundle, int start, int end);
 
-    Integer findMessageSourceListCount(String key, String value, String locale);
+    Integer findMessageSourceListCount(String key, String value, String locale, String bundle);
 
-    String getMSWJson(String key, String value, String locale, int start, int end);
+    String getMSWJson(String key, String value, String locale, String bundle, int start, int end);
 }

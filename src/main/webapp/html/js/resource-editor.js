@@ -53,10 +53,11 @@
         this.defauldSize = 10;
 
         this.searchButtonId  = "searchButton";
-        this.searchFormId  = "filterTranslationsForm";
+        this.searchFormId    = "filterTranslationsForm";
         this.onKeyInput      = "onKeyInput";
         this.onMessageInput  = "onMessageInput";
         this.onMessageSelect = "onMessageSelect";
+        this.bundleSelect    = "bundlesSelect";
 
         this.extraData = "";
 
@@ -144,8 +145,10 @@
                 var onKeyText = Utils._getObjById(Utils._getRealId(scope.configuration.namespace, scope.onKeyInput)).val();
                 var onMessageText = Utils._getObjById(Utils._getRealId(scope.configuration.namespace, scope.onMessageInput)).val();
                 var messageLocale = Utils._getObjById(Utils._getRealId(scope.configuration.namespace, scope.onMessageSelect)).val();
+                var messageBundle = Utils._getObjById(Utils._getRealId(scope.configuration.namespace, scope.bundleSelect)).val();
 
-                scope.extraData = "&resourcekey=" + onKeyText + "&resourcemessage=" + onMessageText + "&resourcelocale=" + messageLocale;
+                scope.extraData = "&resourcekey=" + onKeyText + "&resourcemessage=" + onMessageText
+                    + "&resourcelocale=" + messageLocale + "&resourcebundle=" + messageBundle;
 
                 $('.jPag-current').removeClass('jPag-current');
 
@@ -293,6 +296,17 @@
                         value:obj.key,
                         readonly:''
                     });
+
+
+                    var bundleInput = $('<input/>',{
+                        type: 'text',
+                        value: obj.bundle,
+                        readonly:''
+                    });
+
+                    var td0 = $('<td/>');
+                    td0.append(bundleInput);
+                    tr.append(td0);
 
                     var td1 = $('<td/>');
                     td1.append(keyInput);

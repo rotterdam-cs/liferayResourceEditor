@@ -52,4 +52,12 @@ public class ResourceBundleUtil {
 
         return value;
     }
+
+    public static String getString(Locale locale, String key) {
+        String value = MessageSourceUtil.getMessage(locale, key);
+        if (NULL_VALUE.equals(value)) {
+            value = null;
+        }
+        return value;
+    }
 }

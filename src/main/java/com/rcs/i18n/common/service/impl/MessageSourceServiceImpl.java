@@ -74,16 +74,16 @@ public class MessageSourceServiceImpl implements MessageSourceService {
     }
 
     @Override
-    public String getMSWJson(String key, String value, String locale, int start, int end) {
+    public String getMSWJson(String key, String value, String locale, String bundle, int start, int end) {
         return new StringBuilder()
                 .append("{\"totalRecords\":\"")
-                .append(findMessageSourceListCount(key, value, locale))
+                .append(findMessageSourceListCount(key, value, locale, bundle))
                 .append("\",")
                 .append("\"start\":\"")
                 .append(start)
                 .append("\",")
                 .append("\"records\":")
-                .append(getMessageSourceWrappers(key, value, locale, start, end))
+                .append(getMessageSourceWrappers(key, value, locale, bundle, start, end))
                 .append("}")
                 .toString();
     }
@@ -103,10 +103,10 @@ public class MessageSourceServiceImpl implements MessageSourceService {
     }
 
     @Override
-    public String getMessageSourceWrappers(String key, String value, String locale, int start, int end) {
+    public String getMessageSourceWrappers(String key, String value, String locale, String bundle, int start, int end) {
 
         try{
-            List<MessageSource> messageSourceList = findMessageSourceList(key, value, locale, start, end);
+            List<MessageSource> messageSourceList = findMessageSourceList(key, value, locale, bundle, start, end);
 
             List<MessageSourceWrapper> messageSourceWrapperList = wrapMessageSources(messageSourceList);
 
@@ -167,13 +167,13 @@ public class MessageSourceServiceImpl implements MessageSourceService {
     }
 
     @Override
-    public Integer findMessageSourceListCount(String key, String value, String locale) {
-        return persistence.findMessageSourceListCount(key, value, locale);
+    public Integer findMessageSourceListCount(String key, String value, String locale, String bundle) {
+        return persistence.findMessageSourceListCount(key, value, locale, bundle);
     }
 
     @Override
-    public List<MessageSource> findMessageSourceList(String key, String value, String locale, int start, int end) {
-        return persistence.findMessageSourceList(key, value, locale, start, end);
+    public List<MessageSource> findMessageSourceList(String key, String value, String locale, String bundle, int start, int end) {
+        return persistence.findMessageSourceList(key, value, locale, bundle, start, end);
     }
 
     @Override
@@ -206,6 +206,7 @@ public class MessageSourceServiceImpl implements MessageSourceService {
             if (!StringUtils.equals(preKey, messageSource.getKey())) {
                 messageSourceWrapper = new MessageSourceWrapper();
                 messageSourceWrapper.setKey(messageSource.getKey());
+                messageSourceWrapper.setBundle(messageSource.getBundle());
                 messageSourceWrapper.setSource(new HashMap<String, String>());
                 messageSourceWrapperList.add(messageSourceWrapper);
             }

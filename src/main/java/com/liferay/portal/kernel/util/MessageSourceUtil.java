@@ -18,12 +18,23 @@ public class MessageSourceUtil {
                 if(locale == null){
                     locale  = Locale.US;
                 }
-                Object/*com.rcs.i18n.common.service.MessageSourceService*/ messageSourceService = ObjectFactory.getBean("messageSourceService");
-                Object value = messageSourceService.getClass().getMethod("getMessage", String.class, Locale.class).invoke(messageSourceService, key, locale);
-                return (String) value;
+                return getMessage(locale, key);
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return null;
+    }
+
+    public static String getMessage(Locale locale, String key) {
+
+        try {
+            Object/*com.rcs.i18n.common.service.MessageSourceService*/ messageSourceService = ObjectFactory.getBean("messageSourceService");
+            Object value = messageSourceService.getClass().getMethod("getMessage", String.class, Locale.class).invoke(messageSourceService, key, locale);
+            return (String) value;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return null;
     }
 }
