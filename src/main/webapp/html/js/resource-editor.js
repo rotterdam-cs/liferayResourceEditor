@@ -387,7 +387,7 @@
                 var option = $input
                     .closest('tr')
                     .children('td')
-                    .eq(2)
+                    .eq(3)
                     .children('select')
                     .children('option:selected');
                 option
