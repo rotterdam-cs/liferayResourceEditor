@@ -93,19 +93,18 @@ public class LanguageStartupProcessor extends SimpleAction {
         Map<String, String> languageMap;
 
         try {
-            //put locale to special map
-            PortalLanguageResourcesUtil.putLanguageMap(locale);
-            //get language map
-            languageMap = PortalLanguageResourcesUtil.getLanguageMap(locale);
+            Locale invariantLocale = new Locale(locale.getLanguage());
 
-            if (languageMap.isEmpty()){
-                //FIX
-                //use locale invariant
-                Locale invariantLocale = new Locale(locale.getLanguage());
-                PortalLanguageResourcesUtil.putLanguageMap(invariantLocale);
-                //get language map
-                languageMap = PortalLanguageResourcesUtil.getLanguageMap(invariantLocale);
-            }
+            //put locale invariant to special map
+            PortalLanguageResourcesUtil.putLanguageMap(invariantLocale);
+
+            //get language map of parent locale
+            languageMap = PortalLanguageResourcesUtil.getLanguageMap(invariantLocale);
+
+            //put casual locale
+            PortalLanguageResourcesUtil.putLanguageMap(locale);
+            //get language map for casual locale and merge it with invariant locale
+            languageMap.putAll(PortalLanguageResourcesUtil.getLanguageMap(locale));
 
             return languageMap;
         } catch (Exception e) {
