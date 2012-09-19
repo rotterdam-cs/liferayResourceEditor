@@ -28,11 +28,11 @@ import java.util.ResourceBundle;
  * @author Eduardo Lundgren
  * @author V.Koshelenko
  */
-public class StrutsResourceBundle extends ResourceBundle {
+public class StrutsResourceBundleHook extends ResourceBundle {
 
     private Logger _logger = Logger.getLogger(getClass());
 
-    public StrutsResourceBundle(String portletName, Locale locale) {
+    public StrutsResourceBundleHook(String portletName, Locale locale) {
         _portletName = portletName;
         _locale = locale;
     }
@@ -52,7 +52,6 @@ public class StrutsResourceBundle extends ResourceBundle {
         if (key == null) {
             throw new NullPointerException();
         }
-
         if ((key.equals(JavaConstants.JAVAX_PORTLET_DESCRIPTION) ||
                 key.equals(JavaConstants.JAVAX_PORTLET_KEYWORDS) ||
                 key.equals(JavaConstants.JAVAX_PORTLET_LONG_TITLE) ||
@@ -61,21 +60,17 @@ public class StrutsResourceBundle extends ResourceBundle {
 
             key = key.concat(StringPool.PERIOD).concat(_portletName);
         }
-
         String value = StringUtils.EMPTY;
         try {
             value = ResourceBundleUtil.getString(_locale, key);
         } catch (Exception e) {
-            _logger.error("Can not read property from resource bundle: " + e.getMessage());
+            _logger.error(e.getMessage());
         }
-
         if (StringUtils.isBlank(value))
             LanguageUtil.get(_locale, key);
-
         if ((value == null) && ResourceBundleThreadLocal.isReplace()) {
             value = ResourceBundleUtil.NULL_VALUE;
         }
-
         return value;
     }
 

@@ -5,7 +5,12 @@
 <liferay-portlet-app>
 
     <portlet>
+
         <portlet-name>resource-editor-hook</portlet-name>
+
+        <control-panel-entry-category>portal</control-panel-entry-category>
+        <control-panel-entry-weight>0</control-panel-entry-weight>
+
         <instanceable>false</instanceable>
         <render-weight>1</render-weight>
         <ajaxable>false</ajaxable>
@@ -13,12 +18,13 @@
         <header-portlet-css>/html/css/resources.css</header-portlet-css>
         <header-portlet-css>/html/css/style.css</header-portlet-css>
         <!--Local version of jQuery-->
-        <!--<header-portlet-javascript>/html/js/jquery.min.js</header-portlet-javascript>-->
         <header-portlet-javascript>/html/js/jquery.min.js</header-portlet-javascript>
+        <!--<header-portlet-javascript>/html/js/jquery.js</header-portlet-javascript>-->
         <header-portlet-javascript>/html/js/jquery.paginate.js</header-portlet-javascript>
         <header-portlet-javascript>/html/js/json2.js</header-portlet-javascript>
         <header-portlet-javascript>/html/js/resource-editor.js</header-portlet-javascript>
         <css-class-wrapper>resource-editor-hook</css-class-wrapper>
+
     </portlet>
 
 </liferay-portlet-app>

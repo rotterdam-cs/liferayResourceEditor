@@ -1,18 +1,18 @@
 package com.liferay.portal.kernel.util;
 
+import com.liferay.portal.bean.BeanLocatorImpl;
+import com.liferay.portal.kernel.bean.PortletBeanLocatorUtil;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class ObjectFactory {
 
-    public static Object/*org.springframework.context.ApplicationContext*/ applicationContext;
-
     private static Object getContext() {
-        return applicationContext;
-    }
 
-    public static void setApplicationContext(Object applicationContext) {
-        ObjectFactory.applicationContext = applicationContext;
+        BeanLocatorImpl beanLocator = (BeanLocatorImpl)PortletBeanLocatorUtil.getBeanLocator("rcs");
+
+        return beanLocator.getApplicationContext();
     }
 
     public static Object getBean(String beanName) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {

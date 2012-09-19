@@ -9,7 +9,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "MessageSource")
 public class MessageSource extends BaseModel {
-    
+
     @Column(name = "resourceKey", nullable = false)
     @Index(name = "resourcekey_index")
     private String key;

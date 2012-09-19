@@ -4,13 +4,9 @@ import com.rcs.i18n.common.model.impl.MessageSource;
 import com.rcs.i18n.common.persistence.MessageSourcePersistence;
 import com.rcs.i18n.common.utils.RcsConstants;
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.stereotype.Service;
 
@@ -184,19 +180,20 @@ public class MessageSourcePersistenceImpl extends PersistenceImpl<MessageSource>
 
     @Override
     public void deleteThroughHQL(final String key) {
-        getHibernateTemplate().execute(new HibernateCallback() {
+        List<MessageSource> msList = getHibernateTemplate().execute(new HibernateCallback<List<MessageSource>>() {
             @Override
-            public Object doInHibernate(Session session) throws HibernateException, SQLException {
-                Query hql = session.createQuery("delete from MessageSource ms where ms.key = :key");
+            public List<MessageSource> doInHibernate(Session session) throws HibernateException, SQLException {
+                Query hql = session.createQuery("select ms from MessageSource ms where ms.key = :key");
 
                 hql.setString("key", key);
 
-                hql.executeUpdate();
-
-                return null;
-
+                return  hql.list();
             }
         });
+
+        if (msList != null){
+            deleteAll(msList);
+        }
     }
 
     @Override

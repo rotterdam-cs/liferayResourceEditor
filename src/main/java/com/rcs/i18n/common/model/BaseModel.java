@@ -6,7 +6,8 @@ import javax.persistence.*;
 public abstract class BaseModel implements HibernateModel{
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "profile_seq")
+    @SequenceGenerator(name = "profile_seq", sequenceName = "profile_seq")
     @Column(name = "id", nullable = false, unique = true)
     private Long id;
 

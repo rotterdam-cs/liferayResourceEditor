@@ -1,6 +1,4 @@
-<%@ page import="com.liferay.portal.kernel.language.LanguageUtil" %>
 <%@include file="init.jsp" %>
-
 <div class="portletBlock">
     <div class="filterTranslations">
         <div class="filterTranslationsGroup">

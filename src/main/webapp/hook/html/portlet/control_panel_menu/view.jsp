@@ -29,8 +29,8 @@
 
 		<%
             /*====   PATCH   ====*/
-        Portlet customPortlet = PortletLocalServiceUtil.getPortletById(10154, "resourceeditorhook_WAR_resourceeditorhook");
-        customPortlet.setControlPanelEntryCategory(PortletCategoryKeys.CONTENT);
+//        Portlet customPortlet = PortletLocalServiceUtil.getPortletById(10154, "resourceeditorhook_WAR_resourceeditorhook");
+//        customPortlet.setControlPanelEntryCategory(PortletCategoryKeys.CONTENT);
             /*====================*/
 
 		String ppid = GetterUtil.getString((String)request.getAttribute("control_panel.jsp-ppid"), layoutTypePortlet.getStateMaxPortletId());

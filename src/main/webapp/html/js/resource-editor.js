@@ -1,6 +1,10 @@
 ;
 (function ($) {
 
+    $.ajaxSetup({
+        mimeType:"text/html;charset=UTF-8"
+    })
+
     var Utils = {
 
         _getRealId:function (namespase, id) {
@@ -230,7 +234,7 @@
             _delete: function(){
                 if(confirm($globalScope.configuration.deleteMSG)){
                     var $a = $(this);
-                    var key = $a.closest('tr').children('td').eq(0).children('input[type=text]').val();
+                    var key = $a.closest('tr').children('td').eq(1).children('input[type=text]').val();
                     Utils._sendAjax($globalScope.configuration.deleteURL, key, $globalScope._reloadAll);
                 }
                 return false;
@@ -374,7 +378,7 @@
                 $select
                     .closest('tr')
                     .children('td')
-                    .eq(1)
+                    .eq(2)
                     .children('input[type=text]')
                     .val($select.val());
             },
