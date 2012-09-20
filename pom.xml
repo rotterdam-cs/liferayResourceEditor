@@ -63,7 +63,12 @@
         <war.name>resource-editor-hook</war.name>
         <!--Liferay-->
         <liferay.directory>/home/n1ck/_Work/_Liferay/RCS-lr-6.1.0/liferay-portal-6.1.0-ce-ga1</liferay.directory>
-        <deploy.dir>${liferay.directory}/deploy</deploy.dir>
+        <liferay.tomcat.dir>${liferay.directory}/tomcat-7.0.23</liferay.tomcat.dir>
+        <liferay.root.dir>${liferay.tomcat.dir}/webapps/ROOT</liferay.root.dir>
+        <liferay.classes.dir>${liferay.root.dir}/WEB-INF/classes</liferay.classes.dir>
+        <liferay.lib.dir>${liferay.root.dir}/WEB-INF/lib</liferay.lib.dir>
+        <liferay.deploy.dir>${liferay.directory}/deploy</liferay.deploy.dir>
+
     </properties>
 
     <repositories>
@@ -152,14 +157,14 @@
         </dependency>
 
         <!--Servlet and portal dependencies-->
-<!--
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>${servlet-api.version}</version>
-            <scope>provided</scope>
-        </dependency>
--->
+        <!--
+                <dependency>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>servlet-api</artifactId>
+                    <version>${servlet-api.version}</version>
+                    <scope>provided</scope>
+                </dependency>
+        -->
 
         <dependency>
             <groupId>javax.servlet.jsp</groupId>
@@ -172,6 +177,7 @@
             <groupId>org.apache.tomcat</groupId>
             <artifactId>tomcat-servlet-api</artifactId>
             <version>7.0.23</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -426,6 +432,7 @@
                 <configuration>
                     <encoding>UTF-8</encoding>
                 </configuration>
+
                 <executions>
                     <execution>
                         <id>copy-resources</id>
@@ -434,18 +441,17 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${liferay.directory}/tomcat-7.0.23/webapps/ROOT/WEB-INF/classes/com/liferay/portal/kernel/util</outputDirectory>
+                            <outputDirectory>${liferay.classes.dir}/com/liferay/portlet</outputDirectory>
                             <resources>
+                                <!-- Copy project classes to tomcat lib ext directory -->
                                 <resource>
-                                    <directory>target/classes/com/liferay/portal/kernel/util/</directory>
-                                    <includes>
-                                        <include>ResourceBundleUtil.class</include>
-                                    </includes>
+                                    <directory>target/classes/com/liferay/portlet</directory>
                                 </resource>
                             </resources>
                         </configuration>
                     </execution>
                 </executions>
+
             </plugin>
 
             <plugin>
@@ -468,7 +474,7 @@
                 <configuration>
                     <packagingExcludes>WEB-INF/**/kernel/util/*</packagingExcludes>
                     <warName>${war.name}</warName>
-                    <outputDirectory>${deploy.dir}</outputDirectory>
+                    <outputDirectory>${liferay.deploy.dir}</outputDirectory>
                 </configuration>
             </plugin>
 
@@ -482,9 +488,11 @@
                     </includes>
                     <excludes>
                         <exclude>**/util/ResourceBundleUtil.class</exclude>
+                        <exclude>**/util/MessageSourceUtil.class</exclude>
                     </excludes>
                     <outputDirectory>${liferay.directory}/tomcat-7.0.23/lib/ext</outputDirectory>
                 </configuration>
+
                 <executions>
                     <execution>
                         <phase>prepare-package</phase>
@@ -493,6 +501,7 @@
                         </goals>
                     </execution>
                 </executions>
+
             </plugin>
 
         </plugins>
