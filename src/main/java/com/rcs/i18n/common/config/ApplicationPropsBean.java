@@ -15,6 +15,9 @@ public class ApplicationPropsBean {
     @Value("${import.bundles.on.startup}")
     private boolean importBundlesOnStartup;
 
+    @Value("${import.resource.editor.bundles}")
+    private boolean importResourceEditorBundles;
+
     public boolean isCacheEnabled() {
         return cacheEnabled;
     }
@@ -25,6 +28,10 @@ public class ApplicationPropsBean {
 
     public boolean isImportBundlesOnStartup() {
         return importBundlesOnStartup;
+    }
+
+    public boolean isImportResourceEditorBundles() {
+        return importResourceEditorBundles;
     }
 
 }

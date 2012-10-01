@@ -16,80 +16,31 @@ import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 
-public class LanguageStartupProcessor extends SimpleAction {
+public class LanguageStartupProcessor extends BaseStartupProcessor {
 
-    private static final Logger _logger = Logger.getLogger(LanguageStartupProcessor.class);
-
-    private static ApplicationPropsBean props = ObjectFactory.getBean(ApplicationPropsBean.class);
-
-    private static CacheService cacheService = ObjectFactory.getBean("ehCacheService");
-
-    private static MessageSourcePersistence messageSourcePersistence = ObjectFactory.getBean(MessageSourcePersistence.class);
-
-    private static LocaleService localeService = ObjectFactory.getBean(LocaleService.class);
 
     @Override
     public void run(String[] ids) throws ActionException {
+
+        _logger.info("Registering custom hot deploy listener");
+
         //if startup import is disabled
-        if (!props.isImportOnStartup()){
+        if (!props.isImportOnStartup()) {
             return;
         }
 
         _logger.info("Start language importing");
 
         try {
-            _importBundle();
-        } catch (Exception e){
+            _importBundle(RcsConstants.DEFAULT_BUNDLE_NAME);
+        } catch (Exception e) {
             _logger.error("Import language bundle failed, due " + e.getMessage(), e);
         }
 
         _logger.info("Stop language importing");
     }
 
-    private void _importBundle() throws Exception{
-
-        Locale[] availableLocales = localeService.getAvailableLocales();
-        
-        _logger.info("Number of available locales is " + availableLocales.length);
-        
-        for (int i = 1; i <= availableLocales.length; i++){
-            Locale locale = availableLocales[i - 1];
-
-            _logger.info("Start importing locale " + locale.toString() + ", #" + i);
-
-            Map<String, String> languageMap = getLanguageMap(locale);
-            
-            //go through language map
-            for (Map.Entry<String, String> message: languageMap.entrySet()){
-                //check if message isn't exist in the DB
-                MessageSource messageSource = messageSourcePersistence.getMessage(message.getKey(), locale.toString());
-                if (messageSource == null){
-                    //otherwise put message into DB
-                    messageSource = new MessageSource();
-                    messageSource.setKey(message.getKey());
-                    messageSource.setValue(message.getValue());
-                    messageSource.setLocale(locale.toString());
-                    messageSource.setBundle(RcsConstants.DEFAULT_BUNDLE_NAME);
-                    messageSourcePersistence.insert(messageSource);
-                }
-
-                //put into cache
-                if (props.isCacheEnabled()){
-                    cacheService.putResult(MessageSource.class.getSimpleName(), null,
-                            new Object[]{message.getKey(), locale}, messageSource);
-                }
-            }
-
-            //small formatting
-            int leftNum = availableLocales.length - i;
-            String leftStr = leftNum == 0 ? "nothing" : String.valueOf(leftNum);
-
-            _logger.info("Stop importing locale " + locale.toString() + ", " + leftStr + " left");
-        }
-
-    }
-
-    private Map<String, String> getLanguageMap(Locale locale) {
+    protected Map<String, String> getLanguageMap(Locale locale) {
         Map<String, String> languageMap;
 
         try {
@@ -114,4 +65,5 @@ public class LanguageStartupProcessor extends SimpleAction {
             return Collections.emptyMap();
         }
     }
+
 }
