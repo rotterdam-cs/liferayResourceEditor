@@ -1,5 +1,7 @@
 package com.rcs.i18n.common.service.impl;
 
+import com.liferay.portal.security.auth.CompanyThreadLocal;
+import com.liferay.portal.util.PortalUtil;
 import com.rcs.i18n.common.service.LocaleService;
 import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.language.LanguageUtil;
@@ -31,5 +33,21 @@ public class LocaleServiceImpl implements LocaleService {
             }
         });
         return locales;
+    }
+
+
+    @Override
+    public Locale[] getAvailableLocales(Long companyID) {
+
+        long currentCompanyID = CompanyThreadLocal.getCompanyId();
+
+        CompanyThreadLocal.setCompanyId(companyID);
+
+        Locale[] availableLocales = getAvailableLocales();
+
+        CompanyThreadLocal.setCompanyId(currentCompanyID);
+
+        return availableLocales;
+
     }
 }

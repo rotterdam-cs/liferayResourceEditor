@@ -12,6 +12,9 @@ public class ApplicationPropsBean {
     @Value("${import.on.startup}")
     private boolean importOnStartup;
 
+    @Value("${import.bundles.on.startup}")
+    private boolean importBundlesOnStartup;
+
     public boolean isCacheEnabled() {
         return cacheEnabled;
     }
@@ -19,4 +22,9 @@ public class ApplicationPropsBean {
     public boolean isImportOnStartup() {
         return importOnStartup;
     }
+
+    public boolean isImportBundlesOnStartup() {
+        return importBundlesOnStartup;
+    }
+
 }

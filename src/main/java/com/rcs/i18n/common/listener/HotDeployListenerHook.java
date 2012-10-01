@@ -4,12 +4,15 @@ import com.liferay.portal.kernel.deploy.hot.HotDeployEvent;
 import com.liferay.portal.kernel.deploy.hot.HotDeployException;
 import com.liferay.portal.kernel.deploy.hot.HotDeployListener;
 import com.liferay.portal.kernel.util.HttpUtil;
+import com.liferay.portal.kernel.util.PortalClassLoaderUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.xml.Document;
 import com.liferay.portal.kernel.xml.DocumentException;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.kernel.xml.SAXReaderUtil;
+import com.liferay.portal.security.auth.CompanyThreadLocal;
 import com.liferay.portal.util.Portal;
+import com.liferay.portal.util.PortalUtil;
 import com.rcs.i18n.common.cache.CacheService;
 import com.rcs.i18n.common.config.ApplicationPropsBean;
 import com.rcs.i18n.common.model.impl.MessageSource;
@@ -46,10 +49,16 @@ public class HotDeployListenerHook implements HotDeployListener {
 
     private static final ClassLoader CLASS_LOADER = messageSourcePersistence.getClass().getClassLoader();
 
-    private static final Locale[] availableLocales = localeService.getAvailableLocales();
+    private static final Locale[] availableLocales = localeService.getAvailableLocales(PortalUtil.getDefaultCompanyId());
 
     @Override
     public void invokeDeploy(HotDeployEvent hotDeployEvent) throws HotDeployException {
+
+        String contextName = hotDeployEvent.getServletContextName();
+
+        if(isResourceEditor(contextName)){
+            return;
+        }
 
         ServletContext servletContext = hotDeployEvent.getServletContext();
 
@@ -253,6 +262,10 @@ public class HotDeployListenerHook implements HotDeployListener {
             }
         }
 
+    }
+
+    private boolean isResourceEditor(String contextName){
+        return contextName.equals("resource-editor-hook");
     }
 
     @Override

@@ -441,11 +441,11 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${liferay.classes.dir}/com/liferay/portlet</outputDirectory>
+                            <outputDirectory>${liferay.classes.dir}/com/liferay</outputDirectory>
                             <resources>
                                 <!-- Copy project classes to tomcat lib ext directory -->
                                 <resource>
-                                    <directory>target/classes/com/liferay/portlet</directory>
+                                    <directory>target/classes/com/liferay</directory>
                                 </resource>
                             </resources>
                         </configuration>

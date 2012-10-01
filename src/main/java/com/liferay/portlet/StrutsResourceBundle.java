@@ -28,11 +28,11 @@ import java.util.ResourceBundle;
  * @author Eduardo Lundgren
  * @author V.Koshelenko
  */
-public class StrutsResourceBundleHook extends ResourceBundle {
+public class StrutsResourceBundle extends ResourceBundle {
 
     private Logger _logger = Logger.getLogger(getClass());
 
-    public StrutsResourceBundleHook(String portletName, Locale locale) {
+    public StrutsResourceBundle(String portletName, Locale locale) {
         _portletName = portletName;
         _locale = locale;
     }

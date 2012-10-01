@@ -7,4 +7,7 @@ public interface LocaleService {
     Locale[] getAvailableLocales();
 
     Locale[] getSortedLocales();
+
+    Locale[] getAvailableLocales(Long companyID);
+
 }
