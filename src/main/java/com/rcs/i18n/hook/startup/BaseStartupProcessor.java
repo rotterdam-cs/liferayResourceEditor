@@ -14,7 +14,7 @@ import java.util.Map;
 
 public abstract class BaseStartupProcessor extends SimpleAction {
 
-    protected static final Logger _logger = Logger.getLogger(LoadPortletsBundlesProcessor.class);
+    protected static final Logger _logger = Logger.getLogger(BaseStartupProcessor.class);
 
     protected static ApplicationPropsBean props = ObjectFactory.getBean(ApplicationPropsBean.class);
 
