@@ -159,7 +159,7 @@ public class HotDeployListenerHook implements HotDeployListener {
 
         for (Element portletElement : rootElement.elements("portlet")) {
 
-            String resourceBundleName = portletElement.elementText("resource-bundle");
+            String resourceBundleName = portletElement.elementText("resource-bundle").replace('.', '/');
 
             if (resourceBundleName != null) {
 
