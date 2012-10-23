@@ -29,8 +29,7 @@
     width: 210px;
 }
 
-.filterTranslationsGroup .form-line .center input {
-    width: 200px;
+.filterTranslationsGroup .form-line .center input {    
     margin: 5px;
 }
 
@@ -97,13 +96,15 @@
 }
 
 .resource-value{
-    width: 200px;
-    margin-left: 20px;
+    width: 200px;    
 }
 .resource-locale{
     width: 40px;
 }
 .error{
+    color: red;
+}
+.specialchars{
     color: red;
 }
 .none{
