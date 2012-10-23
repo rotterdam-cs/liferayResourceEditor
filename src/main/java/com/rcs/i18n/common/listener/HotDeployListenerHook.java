@@ -54,18 +54,17 @@ public class HotDeployListenerHook implements HotDeployListener {
     @Override
     public void invokeDeploy(HotDeployEvent hotDeployEvent) throws HotDeployException {
 
-        String contextName = hotDeployEvent.getServletContextName();
-
+        String contextName = hotDeployEvent.getServletContextName();        
         if(isResourceEditor(contextName)){
             return;
         }
 
         ServletContext servletContext = hotDeployEvent.getServletContext();
-
+ 
         ClassLoader contextClassLoader = hotDeployEvent.getContextClassLoader();
 
-        String bundleName = hotDeployEvent.getPluginPackage().getName();
-
+        String bundleName = hotDeployEvent.getPluginPackage().getName();        
+        
         // determines whether <resource-bundle> specified in 'portlet.xml' or <language-properties> specified in 'liferay-hook.xml'
         boolean resourceBundleSpecified = false;
 
@@ -119,6 +118,73 @@ public class HotDeployListenerHook implements HotDeployListener {
         }
     }
 
+    public void readAndProcessBundle(ServletContext servletContext) {
+        
+        String contextName = servletContext.getServletContextName();
+        if(isResourceEditor(contextName)){
+            return;
+        }
+
+        //ServletContext servletContext = hotDeployEvent.getServletContext();
+
+        ClassLoader contextClassLoader = servletContext.getClassLoader();
+
+        
+        //String bundleName = hotDeployEvent.getPluginPackage().getName();
+        String bundleName = contextName;
+
+        // determines whether <resource-bundle> specified in 'portlet.xml' or <language-properties> specified in 'liferay-hook.xml'
+        boolean resourceBundleSpecified = false;
+
+        String portletXML = StringUtils.EMPTY;
+        try {
+            portletXML = HttpUtil.URLtoString(servletContext.getResource("/WEB-INF/" + Portal.PORTLET_XML_FILE_NAME_STANDARD));
+        } catch (IOException e) {
+            _logger.error("Can not read portlet.xml");
+        }
+
+        if (StringUtils.isNotBlank(portletXML)) {
+
+            /*== try to read resource bundle from portlet.xml ===*/
+            try {
+                resourceBundleSpecified = readPortletXML(portletXML, contextClassLoader, bundleName);
+            } catch (DocumentException e) {
+                if (_logger.isDebugEnabled()) {
+                    _logger.debug("Unable to read process xml. ");
+                }
+            }
+        }
+
+        // if <resource-bundle> not specified in portlet.xml -  read from liferay-hook.xml
+        if (!resourceBundleSpecified) {
+
+            String liferayHookXml = StringUtils.EMPTY;
+            try {
+                liferayHookXml = HttpUtil.URLtoString(servletContext.getResource(LIFERAY_HOOK_PATH));
+            } catch (IOException e) {
+                _logger.error("Can not read liferay-hook.xml");
+            }
+
+            if (StringUtils.isNotBlank(liferayHookXml)) {
+
+                /*== try to read resource bundle from liferay-hook.xml ===*/
+                try {
+                    resourceBundleSpecified = readLiferayHookXML(liferayHookXml, contextClassLoader, bundleName);
+                } catch (DocumentException e) {
+                    if (_logger.isDebugEnabled()) {
+                        _logger.debug("Unable to read process xml. ");
+                    }
+                }
+
+            }
+
+        }
+
+        // if <resource-bundle> not specified - use default
+        if (!resourceBundleSpecified) {
+            processBundle(DEFAULT_RESOURCE_NAME, contextClassLoader, bundleName);
+        }
+    }
     /*
    *  Reads 'resource-bundle' property from liferay-hook.xml
    * */
