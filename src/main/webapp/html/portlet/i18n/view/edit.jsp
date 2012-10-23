@@ -2,7 +2,7 @@
 <form action="${saveURL}" id="${namespace}fm" method="POST" style="width:300px;">
 <legend style="border-color: -moz-use-text-color -moz-use-text-color #DDDDDD; font-weight: normal; padding: 0px; margin-bottom:15px;" ><liferay-ui:message key="edit"/></legend>
 <label style="font-size: 12px;"><liferay-ui:message key="key"/>:</label>
-<input id="${namespace}key" name="key" type="text" value="" style="height:20px;width:200px;padding:0px;" /><span class="error none"><liferay-ui:message key="required"/></span><br/><br/>
+<input id="${namespace}key" name="key" type="text" value="" style="height:20px;width:200px;padding:0px;" /><span class="error none"><liferay-ui:message key="required"/></span><span class="specialchars none"><liferay-ui:message key="resource-editor.error.specialchars"/></span><br/><br/>
 <label style="font-size: 12px;"><liferay-ui:message key="resources"/>:</label>
 <table id="${namespace}content">
     <c:forEach items="${locales}" var="localeItem">
