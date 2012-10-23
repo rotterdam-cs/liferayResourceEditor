@@ -1,10 +1,6 @@
 ;
 (function ($) {
 
-    $.ajaxSetup({
-        mimeType:"text/html;charset=UTF-8"
-    })
-
     var Utils = {
 
         _getRealId:function (namespase, id) {
@@ -62,7 +58,7 @@
         this.onMessageInput  = "onMessageInput";
         this.onMessageSelect = "onMessageSelect";
         this.bundleSelect    = "bundlesSelect";
-
+        
         this.extraData = "";
 
         $this = this;
@@ -234,7 +230,7 @@
             _delete: function(){
                 if(confirm($globalScope.configuration.deleteMSG)){
                     var $a = $(this);
-                    var key = $a.closest('tr').children('td').eq(1).children('input[type=text]').val();
+                    var key = $a.closest('tr').children('td').eq(1).html();
                     Utils._sendAjax($globalScope.configuration.deleteURL, key, $globalScope._reloadAll);
                 }
                 return false;
@@ -282,8 +278,21 @@
 
                 var editor = $globalScope;
                 var contentBox = Utils._getObjById(Utils._getRealId(editor.configuration.namespace, editor.mswContentId));
-                var contentTable = $('<table/>');
+                var contentTable = $('<table class="table table-striped table-condensed" />');
 
+                var tableHead = $("" +
+		                "<thead>" +
+			    			"<tr>" +
+			    				"<th style=\"padding-left:2px;\">" + editor.configuration.bundleLabel + "</th>" + 
+			    				"<th>" + editor.configuration.keyLabel + "</th>" +				
+			    				"<th>" + editor.configuration.valueLabel + "</th>" +				
+			    				"<th>" + editor.configuration.localeLabel  + "</th>" +
+			    				"<th></th>" +
+		    				"</tr>" +
+		    			"</thead>");
+    		
+                contentTable.append(tableHead);
+                
                 $.each(json.records, function(idx, obj){
 
                     var inputId = editor.configuration.namespace + '_resource_' + idx;
@@ -294,41 +303,44 @@
                         return false;
                     });
 
-                    var tr = $('<tr/>');
-                    var keyInput = $('<input/>',{
+                    var tr = $('<tr style="height:25px;" />');
+                    /*var keyInput = $('<input />',{
                         type:'text',
                         value:obj.key,
                         readonly:''
-                    });
+                    });*/
 
 
-                    var bundleInput = $('<input/>',{
+                    /*var bundleInput = $('<span />',{
                         type: 'text',
                         value: obj.bundle,
                         readonly:''
-                    });
+                    });*/
 
-                    var td0 = $('<td/>');
-                    td0.append(bundleInput);
+                    var td0 = $('<td style="width:150px;padding-left:2px;" />');
+                    //td0.append(bundleInput);
+                    td0.append(obj.bundle);
                     tr.append(td0);
 
-                    var td1 = $('<td/>');
-                    td1.append(keyInput);
+                    var td1 = $('<td style="width:150px;" />');
+                    //td1.append(keyInput);
+                    td1.append(obj.key);
                     tr.append(td1);
 
-                    var resourceInput = $('<input/>',{
-                        'class':'content',
+                    var resourceInput = $('<input />',{ //style="height:20px;width:230px;"                                                
                         id: inputId,
-                        type:'text',
+                        'class':'content',
+                        type:'text',                        
                         name:obj.key,
-                        value:firstKey
+                        value:firstKey,
+                        style:'height:20px;width:200px;padding:0px;'
                     });
 
-                    var td2 = $('<td/>');
+                    var td2 = $('<td style="width:200px;" />');
                     td2.append(resourceInput);
                     tr.append(td2);
 
-                    var select = $('<select/>', {
+                    var select = $('<select style="height:22px;width:70px;margin:3px;" />', {
                         name: obj.key
                     });
 
@@ -342,7 +354,7 @@
                         select.append(option);
                     });
 
-                    var td3 = $('<td/>');
+                    var td3 = $('<td style="width:100px;" />');
                     td3.append(select);
                     tr.append(td3);
 
@@ -386,7 +398,7 @@
             //When input stopped editing and focus out, get input value and set in to relevant option
             //and set options 'data-value' to 'changed'
             _inputOnFocusOut: function(){
-                var $input = $(this);
+                var $input = $(this);                
                 var inputVal = $input.val();
                 var option = $input
                     .closest('tr')
@@ -402,10 +414,10 @@
             //get all options that was changed, serialize them and post via ajax
             _saveResources:function () {
                 var editor = this;
-                var changedOptionArr = $('option[data-value=changed]');
+                var changedOptionArr = $('option[data-value=changed]');                
                 var arr = [];
                 $.each(changedOptionArr, function(idx, option){
-                    var $option = $(option);
+                    var $option = $(option);                    
                     arr[arr.length] = {
                         'key':$option.attr('data-key'),
                         'value': $option.val(),
@@ -465,9 +477,8 @@
             },
 
             _saveResources: function(){
-                var editor = this;
-                var key = Utils._getObjById(Utils._getRealId(editor.configuration.namespace, editor.keyInputId));
-
+                var editor = this;                
+                var key = Utils._getObjById(Utils._getRealId(editor.configuration.namespace, editor.keyInputId));                
                 var isKeyValid = editor._validateKey(key);
                 if(isKeyValid){
                     var json = editor._serializeTable();
@@ -498,13 +509,23 @@
 
             _validateKey: function(key){
                 var keyVal = $(key).val();
+                // check if empty
                 if(keyVal == ''){
                     $('.error').removeClass('none');
                     return false;
-                }else{
-                    $('.error').addClass('none');
-                    return true;
+                } 
+                
+                var iChars = "!@#$%^&*()+=-[]\\\';,./{}|\":<>?~_";
+                for (var i = 0; i < keyVal.length; i++) {
+                    if (iChars.indexOf(keyVal.charAt(i)) != -1) {                        
+                        $('.specialchars').removeClass('none');
+                        return false;
+                    }
                 }
+                
+                $('.error').addClass('none');
+                $('.specialchars').addClass('none');
+                return true;                
             }
         }
     });
