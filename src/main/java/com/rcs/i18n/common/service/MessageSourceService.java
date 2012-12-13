@@ -9,8 +9,10 @@ import java.util.Locale;
 public interface MessageSourceService {
     
     String getMessage(String key);
-    
+
     String getMessage(String key, Locale locale);
+
+    String getMessage(String bundleName, String key, Locale locale);
     
     String getMessage(String key, Locale locale, String defaultValue);
     

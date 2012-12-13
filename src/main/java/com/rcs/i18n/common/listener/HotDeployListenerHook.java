@@ -4,13 +4,11 @@ import com.liferay.portal.kernel.deploy.hot.HotDeployEvent;
 import com.liferay.portal.kernel.deploy.hot.HotDeployException;
 import com.liferay.portal.kernel.deploy.hot.HotDeployListener;
 import com.liferay.portal.kernel.util.HttpUtil;
-import com.liferay.portal.kernel.util.PortalClassLoaderUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.xml.Document;
 import com.liferay.portal.kernel.xml.DocumentException;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.kernel.xml.SAXReaderUtil;
-import com.liferay.portal.security.auth.CompanyThreadLocal;
 import com.liferay.portal.util.Portal;
 import com.liferay.portal.util.PortalUtil;
 import com.rcs.i18n.common.cache.CacheService;
@@ -26,7 +24,9 @@ import javax.servlet.ServletContext;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.*;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
 
 public class HotDeployListenerHook implements HotDeployListener {
 
@@ -64,8 +64,6 @@ public class HotDeployListenerHook implements HotDeployListener {
 
         ClassLoader contextClassLoader = hotDeployEvent.getContextClassLoader();
 
-        String bundleName = hotDeployEvent.getPluginPackage().getName();
-
         // determines whether <resource-bundle> specified in 'portlet.xml' or <language-properties> specified in 'liferay-hook.xml'
         boolean resourceBundleSpecified = false;
 
@@ -75,6 +73,8 @@ public class HotDeployListenerHook implements HotDeployListener {
         } catch (IOException e) {
             _logger.error("Can not read portlet.xml");
         }
+
+        String bundleName = StringPool.BLANK;
 
         if (StringUtils.isNotBlank(portletXML)) {
 
@@ -86,6 +86,11 @@ public class HotDeployListenerHook implements HotDeployListener {
                     _logger.debug("Unable to read process xml. ");
                 }
             }
+        }
+
+        //set bundle name as plugin-package name
+        if (StringUtils.isBlank(bundleName)) {
+            bundleName = hotDeployEvent.getPluginPackage().getName();
         }
 
         // if <resource-bundle> not specified in portlet.xml -  read from liferay-hook.xml
@@ -159,9 +164,20 @@ public class HotDeployListenerHook implements HotDeployListener {
 
         for (Element portletElement : rootElement.elements("portlet")) {
 
-            String resourceBundleName = portletElement.elementText("resource-bundle").replace('.', '/');
+            //Set portlet title as resource bundle name
+            Element portletInfo = portletElement.element("portlet-info");
+            if (portletInfo != null) {
+                Element titleElement = portletInfo.element("title");
+                if (titleElement != null) {
+                    bundleName = titleElement.getText();
+                }
+            }
 
-            if (resourceBundleName != null) {
+            String resourceBundleName = portletElement.elementText("resource-bundle");
+
+            if (resourceBundleName != null) { //NullPointer exception fix
+
+                resourceBundleName = resourceBundleName.replace('.', '/');
 
                 resourceBundleSpecified = true;
 
@@ -237,7 +253,7 @@ public class HotDeployListenerHook implements HotDeployListener {
             String key = (String) property.getKey();
             String value = (String) property.getValue();
 
-            MessageSource messageSource = messageSourcePersistence.getMessage(key, locale.toString());
+            MessageSource messageSource = messageSourcePersistence.getMessage(bundleName, key, locale.toString());
             if (messageSource == null) {
 
                 messageSource = new MessageSource();

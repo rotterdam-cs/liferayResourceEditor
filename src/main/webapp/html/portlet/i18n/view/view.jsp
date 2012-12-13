@@ -1,4 +1,7 @@
 <%@include file="init.jsp" %>
+<div class="portlet-msg-info">
+    <liferay-ui:message key="this-page-is-empty-edit-it-to-add-some-text" />
+</div>
 <div class="portletBlock">
     <div class="filterTranslations">
         <div class="filterTranslationsGroup">

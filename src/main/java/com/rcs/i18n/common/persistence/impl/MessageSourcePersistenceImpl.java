@@ -57,6 +57,33 @@ public class MessageSourcePersistenceImpl extends PersistenceImpl<MessageSource>
     }
 
     @Override
+    public MessageSource getMessage(final String bundleName, final String key, final String locale) {
+
+        //check bundleName
+        if (StringUtils.isBlank(bundleName)) {
+            return this.getMessage(key, locale);
+        }
+
+        return getHibernateTemplate().execute(new HibernateCallback<MessageSource>() {
+            @Override
+            public MessageSource doInHibernate(Session session) throws HibernateException, SQLException {
+                String localeCountry = locale.substring(0,2) + "%";
+                String hqlQueryString = "select ms from MessageSource ms where ms.key=:key and ms.bundle=:bundleName and ms.locale like :locale";
+                Query hqlQuery = session.createQuery(hqlQueryString);
+                hqlQuery.setParameter("bundleName", bundleName);
+                hqlQuery.setParameter("key", key);
+                hqlQuery.setParameter("locale", localeCountry);
+                List<MessageSource> resultList = hqlQuery.list();
+                if (resultList != null && resultList.size() > 0) {
+                    return resultList.get(0);
+                } else {
+                    return null;
+                }
+            }
+        });
+    }
+
+    @Override
     public List<MessageSource> findMessages(final Collection keys) {
 
         return getHibernateTemplate().execute(new HibernateCallback<List<MessageSource>>() {

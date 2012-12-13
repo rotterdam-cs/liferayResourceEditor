@@ -11,6 +11,8 @@ public interface MessageSourcePersistence extends Persistence<MessageSource>{
 
     MessageSource getMessage(String key, String locale);
 
+    MessageSource getMessage(String bundleName, String key, String locale);
+
     List<MessageSource> findMessages(Collection keys);
 
     List<MessageSource> getMessageSourceList(int start, int end);

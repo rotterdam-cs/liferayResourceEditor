@@ -48,6 +48,17 @@ public class MessageSourceServiceImpl implements MessageSourceService {
     }
 
     @Override
+    public String getMessage(String bundleName, String key, Locale locale) {
+        try {
+            MessageSource message = persistence.getMessage(bundleName, key, locale.toString());
+            return message == null ? key : message.getValue();
+        } catch (Exception e) {
+            _logger.warn("Couldn't get message with key '" + key + "' bundleName='" + bundleName + "', returning default", e);
+            return getMessage(key, locale);
+        }
+    }
+
+    @Override
     public String getMessage(String key, Locale locale, String defaultValue) {
         try {
             MessageSource message = persistence.getMessage(key, locale.toString());
