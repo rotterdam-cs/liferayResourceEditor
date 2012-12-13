@@ -10,11 +10,22 @@ import com.rcs.i18n.common.utils.RcsConstants;
 import com.rcs.i18n.hook.util.PortalLanguageResourcesUtil;
 import com.liferay.portal.kernel.events.ActionException;
 import com.liferay.portal.kernel.events.SimpleAction;
+import com.liferay.portal.model.Portlet;
+import com.liferay.portal.service.PortletLocalService;
+import com.liferay.portal.service.PortletLocalServiceUtil;
+import com.rcs.i18n.common.listener.HotDeployListenerHook;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
 import org.apache.log4j.Logger;
 
-import java.util.Collections;
-import java.util.Locale;
-import java.util.Map;
+import java.util.logging.Level;
+import javax.servlet.ServletContext;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.web.portlet.util.PortletUtils;
 
 public class LanguageStartupProcessor extends BaseStartupProcessor {
 
@@ -36,7 +47,44 @@ public class LanguageStartupProcessor extends BaseStartupProcessor {
         } catch (Exception e) {
             _logger.error("Import language bundle failed, due " + e.getMessage(), e);
         }
+        
+        /*
+        List<Portlet> portlets = PortletLocalServiceUtil.getPortlets();
+        _logger.info("portlet iteration");
+        
+        
+        for (Portlet portlet : portlets) {
+            if (StringUtils.isNotBlank(portlet.getContextPath())) {                
+                String portletId = portlet.getPortletId();
+                com.liferay.portal.kernel.portlet.PortletBag portletBag = com.liferay.portal.kernel.portlet.PortletBagPool.get(portletId);
+                ServletContext servletContext = portletBag.getServletContext();
+                
+                
+                URL resource = null;
+                try {
+                    resource = servletContext.getResource("/WEB-INF/classes/content/Language.properties");
+                } catch (MalformedURLException ex) {
+                    java.util.logging.Logger.getLogger(LanguageStartupProcessor.class.getName()).log(Level.SEVERE, null, ex);
+                    continue;
+                }
+                if (resource != null) {
+                    Properties bundle = new Properties();
+                    try {
+                        InputStream inStream = resource.openStream();
+                        bundle.load(inStream);
+                        inStream.close();
+                        for (Map.Entry<String, String> message : (new HashMap<String, String>((Map) bundle)).entrySet()) {
+                            //check if message isn't exist in the DB
+                            _logger.warn("info: " + message.getKey());
+                        }
+                        //return new HashMap<String, String>((Map) bundle 
 
+                    } catch (IOException e) {
+                        _logger.warn("Could not read file", e);
+                    }
+                }
+            }
+        }    */    
         _logger.info("Stop language importing");
     }
 

@@ -24,7 +24,11 @@
                 editURL: '${editURL}',
                 deleteMSG: '<liferay-ui:message key="delete"/>',
                 mswJson : data,
-                itemCount : 10
+                itemCount : 10,
+                bundleLabel: '<liferay-ui:message key="resource-editor.bundle"/>',
+                keyLabel: '<liferay-ui:message key="resource-editor.key"/>',
+                valueLabel: '<liferay-ui:message key="resource-editor.value"/>',
+                localeLabel: '<liferay-ui:message key="resource-editor.locale"/>'
             });
         }
 

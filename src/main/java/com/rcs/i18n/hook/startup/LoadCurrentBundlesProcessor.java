@@ -37,7 +37,7 @@ public class LoadCurrentBundlesProcessor extends BaseStartupProcessor {
     protected Map<String, String> getLanguageMap(Locale locale) {
 
         String resourceName = baseResourceName + StringPool.UNDERLINE + locale.getLanguage() + DEFAULT_RESOURCE_SUFFIX;
-
+        
         URL resource = classLoader.getResource(resourceName);
 
         if (resource == null) {
